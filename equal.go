@@ -3,7 +3,10 @@ package assertjson
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"reflect"
+	"strings"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/yudai/gojsondiff"
@@ -35,70 +38,28 @@ func Equal(t TestingT, expected, actual []byte, msgAndArgs ...interface{}) bool 
 
 // Equal compares two JSON payloads.
 func (c Comparer) Equal(t TestingT, expected, actual []byte, msgAndArgs ...interface{}) bool {
-	var (
-		expDecoded, actDecoded interface{}
-		diffValue              gojsondiff.Diff
-	)
-	err := json.Unmarshal(expected, &expDecoded)
-	if err != nil {
-		assert.Fail(t, fmt.Sprintf("Failed to unmarshal expected:\n%+v", err), msgAndArgs...)
-		return false
-	}
-	err = json.Unmarshal(actual, &actDecoded)
-	if err != nil {
-		assert.Fail(t, fmt.Sprintf("Failed to unmarshal actual:\n%+v", err), msgAndArgs...)
-		return false
-	}
-
-	if expArray, ok := expDecoded.([]interface{}); ok {
-		if actArray, ok := actDecoded.([]interface{}); ok {
-			diffValue = gojsondiff.New().CompareArrays(expArray, actArray)
-		} else {
-			assert.Fail(t, "Types mismatch, array expected", msgAndArgs...)
-			return false
-		}
-	} else if expObject, ok := expDecoded.(map[string]interface{}); ok {
-		if actObject, ok := actDecoded.(map[string]interface{}); ok {
-			diffValue = gojsondiff.New().CompareObjects(expObject, actObject)
-		} else {
-			assert.Fail(t, "Types mismatch, object expected", msgAndArgs...)
-			return false
-		}
-	} else if !assert.Equal(t, expDecoded, actDecoded, msgAndArgs...) { // scalar value comparison
-		return false
-	}
-
-	if diffValue == nil {
+	err := c.FailNotEqual(expected, actual)
+	if err == nil {
 		return true
 	}
 
-	if !diffValue.Modified() {
-		return true
-	}
+	msg := err.Error()
+	msg = strings.ToUpper(msg[0:1]) + msg[1:]
+	assert.Fail(t, msg, msgAndArgs...)
 
-	diffValue = &diff{deltas: c.filterDeltas(diffValue.Deltas())}
-	if !diffValue.Modified() {
-		return true
-	}
-
-	diffText, err := formatter.NewAsciiFormatter(expDecoded, c.FormatterConfig).Format(diffValue)
-	if err != nil {
-		assert.Fail(t, fmt.Sprintf("Failed to format diff:\n%+v", err), msgAndArgs...)
-		return false
-	}
-
-	assert.Fail(t, "Not equal:\n"+diffText, msgAndArgs...)
 	return false
 }
 
 func (c Comparer) filterDeltas(deltas []gojsondiff.Delta) []gojsondiff.Delta {
 	result := make([]gojsondiff.Delta, 0, len(deltas))
+
 	for _, delta := range deltas {
 		switch v := delta.(type) {
 		case *gojsondiff.Modified:
 			if c.IgnoreDiff == "" {
 				break
 			}
+
 			if s, ok := v.OldValue.(string); ok && s == c.IgnoreDiff { // discarding ignored diff
 				continue
 			}
@@ -107,17 +68,20 @@ func (c Comparer) filterDeltas(deltas []gojsondiff.Delta) []gojsondiff.Delta {
 			if len(v.Deltas) == 0 {
 				continue
 			}
+
 			delta = v
 		case *gojsondiff.Array:
 			v.Deltas = c.filterDeltas(v.Deltas)
 			if len(v.Deltas) == 0 {
 				continue
 			}
+
 			delta = v
 		}
 
 		result = append(result, delta)
 	}
+
 	return result
 }
 
@@ -131,4 +95,68 @@ func (diff *diff) Deltas() []gojsondiff.Delta {
 
 func (diff *diff) Modified() bool {
 	return len(diff.deltas) > 0
+}
+
+// FailNotEqual returns error if JSON payloads are different, nil otherwise.
+func FailNotEqual(expected, actual []byte) error {
+	return defaultComparer.FailNotEqual(expected, actual)
+}
+
+// FailNotEqual returns error if JSON payloads are different, nil otherwise.
+func (c Comparer) FailNotEqual(expected, actual []byte) error {
+	var (
+		expDecoded, actDecoded interface{}
+		diffValue              gojsondiff.Diff
+	)
+
+	err := json.Unmarshal(expected, &expDecoded)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal expected:\n%+v", err)
+	}
+
+	err = json.Unmarshal(actual, &actDecoded)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal actual:\n%+v", err)
+	}
+
+	switch v := expDecoded.(type) {
+	case []interface{}:
+		if actArray, ok := actDecoded.([]interface{}); ok {
+			diffValue = gojsondiff.New().CompareArrays(v, actArray)
+		} else {
+			return errors.New("types mismatch, array expected")
+		}
+
+	case map[string]interface{}:
+		if actObject, ok := actDecoded.(map[string]interface{}); ok {
+			diffValue = gojsondiff.New().CompareObjects(v, actObject)
+		} else {
+			return errors.New("types mismatch, object expected")
+		}
+
+	default:
+		if !reflect.DeepEqual(expDecoded, actDecoded) { // scalar value comparison
+			return fmt.Errorf("values %v and %v are not equal", expDecoded, actDecoded)
+		}
+	}
+
+	if diffValue == nil {
+		return nil
+	}
+
+	if !diffValue.Modified() {
+		return nil
+	}
+
+	diffValue = &diff{deltas: c.filterDeltas(diffValue.Deltas())}
+	if !diffValue.Modified() {
+		return nil
+	}
+
+	diffText, err := formatter.NewAsciiFormatter(expDecoded, c.FormatterConfig).Format(diffValue)
+	if err != nil {
+		return fmt.Errorf("failed to format diff:\n%+v", err)
+	}
+
+	return errors.New("not equal:\n" + diffText)
 }

@@ -57,8 +57,8 @@ func TestEquals_message(t *testing.T) {
 		assert.Equal(t, "\n%s", format)
 		assert.Len(t, args, 1)
 
-		assert.Equal(t, `	Error Trace:	equal.go:90
-	            				equal.go:33
+		assert.Equal(t, `	Error Trace:	equal.go:48
+	            				equal.go:36
 	            				equal_test.go:56
 	Error:      	Not equal:
 	            	 {
@@ -98,9 +98,12 @@ func run(
 	equal func(t assertjson.TestingT, expected, actual []byte, msgAndArgs ...interface{}) bool,
 ) {
 	t.Parallel()
+
 	tt := testingT(func(format string, args ...interface{}) {})
+
 	for i, tc := range cases {
 		tc := tc
+
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			assert.Equal(t, tc.equals, equal(tt, []byte(tc.expected), []byte(tc.actual)))
 		})

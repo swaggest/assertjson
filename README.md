@@ -1,6 +1,6 @@
 # JSON assertions
 
-[![Build Status](https://travis-ci.org/swaggest/assertjson.svg?branch=master)](https://travis-ci.org/swaggest/assertjson)
+[![Build Status](https://github.com/swaggest/assertjson/workflows/test/badge.svg)](https://github.com/swaggest/assertjson/actions?query=branch%3Amaster+workflow%3Atest)
 [![Coverage Status](https://codecov.io/gh/swaggest/assertjson/branch/master/graph/badge.svg)](https://codecov.io/gh/swaggest/assertjson)
 [![GoDoc](https://godoc.org/github.com/swaggest/assertjson?status.svg)](https://godoc.org/github.com/swaggest/assertjson)
 
