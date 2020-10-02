@@ -3,10 +3,9 @@ module github.com/swaggest/assertjson
 go 1.13
 
 require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/bool64/dev v0.1.0
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
-	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
