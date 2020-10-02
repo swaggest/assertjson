@@ -7,6 +7,8 @@
 This library extends awesome [`github.com/stretchr/testify/assert`](https://godoc.org/github.com/stretchr/testify/assert) 
 with nice JSON equality assertions built with [`github.com/yudai/gojsondiff`](https://github.com/yudai/gojsondiff).
 
+Also it provides JSON marshaler with [compact indentation](#compact-indentation).
+
 ## Usage
 
 Default comparer is set up to ignore difference against `"<ignore-diff>"` values. It is accessible with package function `Equal`.
@@ -47,3 +49,46 @@ func Test(t *testing.T) {
 ```
 
 Custom `Comparer` can be created and used to control ignore behavior and formatter options.
+
+### Compact Indentation
+Often `json.MarshalIndent` produces result, that is not easy to comprehend due to high count of lines that requires 
+massive scrolling effort to read.
+
+This library provides an alternative `assertjson.MarshalIndentCompact` which keeps indentation and line breaks only 
+for major part of JSON document, while compacting smaller pieces.
+
+```go
+j, err := assertjson.MarshalIndentCompact(v, "", "  ", 100) // 100 is line width limit.
+```
+ 
+```json
+{
+  "openapi":"3.0.2",
+  "info":{"title":"","version":""},
+  "paths":{
+    "/test/{in-path}":{
+      "post":{
+        "summary":"Title",
+        "description":"",
+        "operationId":"name",
+        "parameters":[
+          {"name":"in_query","in":"query","schema":{"type":"integer"}},
+          {"name":"in-path","in":"path","required":true,"schema":{"type":"boolean"}},
+          {"name":"in_cookie","in":"cookie","schema":{"type":"number"}},
+          {"name":"X-In-Header","in":"header","schema":{"type":"string"}}
+        ],
+        "requestBody":{
+          "content":{
+            "application/x-www-form-urlencoded":{"schema":{"$ref":"#/components/schemas/FormDataOpenapiTestInput"}}
+          }
+        },
+        "responses":{"200":{"description":"OK","content":{"application/json":{"schema":{}}}}},
+        "deprecated":true
+      }
+    }
+  },
+  "components":{
+    "schemas":{"FormDataOpenapiTestInput":{"type":"object","properties":{"in_form_data":{"type":"string"}}}}
+  }
+}
+```
