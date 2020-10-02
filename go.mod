@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/bool64/dev v0.1.0
 	github.com/golang/protobuf v1.3.1 // indirect
+	github.com/iancoleman/orderedmap v0.0.0-20190318233801-ac98e3ecb4b0
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/onsi/ginkgo v1.8.0 // indirect
