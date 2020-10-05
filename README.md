@@ -63,14 +63,15 @@ j, err := assertjson.MarshalIndentCompact(v, "", "  ", 100) // 100 is line width
  
 ```json
 {
-  "openapi":"3.0.2",
-  "info":{"title":"","version":""},
+  "openapi":"3.0.2","info":{"title":"","version":""},
   "paths":{
     "/test/{in-path}":{
       "post":{
-        "summary":"Title",
-        "description":"",
-        "operationId":"name",
+        "summary":"Title","description":"","operationId":"name",
+        "x-some-array":[
+          "abc","def",123456,7890123456,[],{"foo":"bar"},
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!"
+        ],
         "parameters":[
           {"name":"in_query","in":"query","schema":{"type":"integer"}},
           {"name":"in-path","in":"path","required":true,"schema":{"type":"boolean"}},
@@ -91,4 +92,9 @@ j, err := assertjson.MarshalIndentCompact(v, "", "  ", 100) // 100 is line width
     "schemas":{"FormDataOpenapiTestInput":{"type":"object","properties":{"in_form_data":{"type":"string"}}}}
   }
 }
+```
+
+Available as `jsoncompact` CLI tool.
+```
+go get github.com/swaggest/assertjson/cmd/jsoncompact
 ```
