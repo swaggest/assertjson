@@ -73,6 +73,8 @@ func marshalArray(o []interface{}, compactLen int, indent string, pad []byte, li
 	// Allocate result with a size of compact form, because it is impossible to make result shorter.
 	res := append(make([]byte, 0, compactLen), '[', '\n')
 
+	curLen := 0
+
 	for i, val := range o {
 		// Build item value with an increased padding.
 		jsonVal, err := marshalIndentCompact(val, indent, append(pad, []byte(indent)...), lineLen)
@@ -80,19 +82,33 @@ func marshalArray(o []interface{}, compactLen int, indent string, pad []byte, li
 			return nil, err
 		}
 
-		// Add item JSON with current padding.
-		res = append(res, pad...)
+		// Check if adding key-value pair (`"k":"v",`) to current line would exceed length limit
+		if curLen > 0 && curLen+len(jsonVal)+1 > lineLen {
+			res = append(res, '\n')
+			curLen = 0
+		}
+
+		// Pad new line.
+		if curLen == 0 {
+			res = append(res, pad...)
+			curLen += len(pad)
+		}
+
+		// Update current length counter.
+		curLen += len(jsonVal) + 1 // 1 is ','.
+
+		// Add item JSON.
 		res = append(res, jsonVal...)
 
 		if i == len(o)-1 {
 			// Close array at last item.
 			res = append(res, '\n')
 			// Strip one indent from a closing bracket.
-			res = append(res, pad[len(indent):]...)
+			res = append(res, pad[:len(pad)-len(indent)]...)
 			res = append(res, ']')
 		} else {
 			// Add colon and new line after an item.
-			res = append(res, ',', '\n')
+			res = append(res, ',')
 		}
 	}
 
@@ -102,6 +118,8 @@ func marshalArray(o []interface{}, compactLen int, indent string, pad []byte, li
 func marshalObject(o orderedmap.OrderedMap, compactLen int, indent string, pad []byte, lineLen int) ([]byte, error) {
 	// Allocate result with a size of compact form, because it is impossible to make result shorter.
 	res := append(make([]byte, 0, compactLen), '{', '\n')
+
+	curLen := 0
 
 	// Iterate object using keys slice to preserve properties order.
 	keys := o.Keys()
@@ -123,8 +141,22 @@ func marshalObject(o orderedmap.OrderedMap, compactLen int, indent string, pad [
 			return nil, err
 		}
 
+		// Check if adding key-value pair (`"k":"v",`) to current line would exceed length limit
+		if curLen > 0 && curLen+len(kj)+len(jsonVal)+2 > lineLen {
+			res = append(res, '\n')
+			curLen = 0
+		}
+
+		// Pad new line.
+		if curLen == 0 {
+			res = append(res, pad...)
+			curLen += len(pad)
+		}
+
+		// Update current length counter.
+		curLen += len(kj) + len(jsonVal) + 1 + 1 // 1 + 1 is ':' and ','.
+
 		// Add key JSON with current padding.
-		res = append(res, pad...)
 		res = append(res, kj...)
 		res = append(res, ':')
 		// Add value JSON to the same line.
@@ -134,11 +166,11 @@ func marshalObject(o orderedmap.OrderedMap, compactLen int, indent string, pad [
 			// Close object at last property.
 			res = append(res, '\n')
 			// Strip one indent from a closing bracket.
-			res = append(res, pad[len(indent):]...)
+			res = append(res, pad[:len(pad)-len(indent)]...)
 			res = append(res, '}')
 		} else {
 			// Add colon and new line after a property.
-			res = append(res, ',', '\n')
+			res = append(res, ',')
 		}
 	}
 
