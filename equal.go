@@ -77,8 +77,12 @@ func (c Comparer) EqualMarshal(t TestingT, expected []byte, actualValue interfac
 		h.Helper()
 	}
 
-	actual, err := json.Marshal(actualValue)
-	assert.NoError(t, err)
+	actual, err := MarshalIndentCompact(actualValue, "", "  ", 80)
+	assert.NoError(t, err, "failed to marshal actual value")
+
+	if len(msgAndArgs) == 0 {
+		msgAndArgs = append(msgAndArgs, string(actual))
+	}
 
 	return c.Equal(t, expected, actual, msgAndArgs...)
 }

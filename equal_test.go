@@ -57,7 +57,7 @@ func TestEquals_message(t *testing.T) {
 		assert.Equal(t, "\n%s", format)
 		assert.Len(t, args, 1)
 
-		assert.Equal(t, `	Error Trace:	equal.go:70
+		assert.Equal(t, `	Error Trace:	equal.go:69
 	            				equal.go:44
 	            				equal_test.go:56
 	Error:      	Not equal:

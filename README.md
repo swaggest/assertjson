@@ -12,7 +12,7 @@ Also it provides JSON marshaler with [compact indentation](#compact-indentation)
 
 ## Usage
 
-Default comparer is set up to ignore difference against `"<ignore-diff>"` values. It is accessible with package function `Equal`.
+Default comparer is set up to ignore difference against `"<ignore-diff>"` values. It is accessible with package functions `Equal` and `EqualMarshal`.
 
 ```go
 package my_test
