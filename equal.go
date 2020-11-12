@@ -44,7 +44,7 @@ func Equal(t TestingT, expected, actual []byte, msgAndArgs ...interface{}) bool 
 	return defaultComparer.Equal(t, expected, actual, msgAndArgs...)
 }
 
-// Equal marshals actual value and compares two JSON documents ignoring string values "<ignore-diff>".
+// EqualMarshal marshals actual value and compares two JSON documents ignoring string values "<ignore-diff>".
 func EqualMarshal(t TestingT, expected []byte, actualValue interface{}, msgAndArgs ...interface{}) bool {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
