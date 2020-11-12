@@ -57,8 +57,8 @@ func TestEquals_message(t *testing.T) {
 		assert.Equal(t, "\n%s", format)
 		assert.Len(t, args, 1)
 
-		assert.Equal(t, `	Error Trace:	equal.go:48
-	            				equal.go:36
+		assert.Equal(t, `	Error Trace:	equal.go:70
+	            				equal.go:44
 	            				equal_test.go:56
 	Error:      	Not equal:
 	            	 {
@@ -144,4 +144,16 @@ func TestEqual(t *testing.T) {
 		{`[{}, {"val": "<ignore-diff>"}, {}]`, `[{"val": 123}]`, false},
 		{`{"a": [1, {"val": "<ignore-diff>"}, 3]}`, `{"a": [1, {"val": 123}, 3]}`, true},
 	}, assertjson.Equal)
+}
+
+func TestEqualMarshal(t *testing.T) {
+	v := struct {
+		A int    `json:"a"`
+		B string `json:"b"`
+	}{
+		A: 123,
+		B: "abc",
+	}
+
+	assertjson.EqualMarshal(t, []byte(`{"a":123,"b":"abc"}`), v)
 }

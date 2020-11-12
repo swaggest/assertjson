@@ -31,13 +31,34 @@ type TestingT interface {
 	Errorf(format string, args ...interface{})
 }
 
+type tHelper interface {
+	Helper()
+}
+
 // Equal compares two JSON documents ignoring string values "<ignore-diff>".
 func Equal(t TestingT, expected, actual []byte, msgAndArgs ...interface{}) bool {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+
 	return defaultComparer.Equal(t, expected, actual, msgAndArgs...)
+}
+
+// Equal marshals actual value and compares two JSON documents ignoring string values "<ignore-diff>".
+func EqualMarshal(t TestingT, expected []byte, actualValue interface{}, msgAndArgs ...interface{}) bool {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+
+	return defaultComparer.EqualMarshal(t, expected, actualValue, msgAndArgs...)
 }
 
 // Equal compares two JSON payloads.
 func (c Comparer) Equal(t TestingT, expected, actual []byte, msgAndArgs ...interface{}) bool {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+
 	err := c.FailNotEqual(expected, actual)
 	if err == nil {
 		return true
@@ -48,6 +69,18 @@ func (c Comparer) Equal(t TestingT, expected, actual []byte, msgAndArgs ...inter
 	assert.Fail(t, msg, msgAndArgs...)
 
 	return false
+}
+
+// EqualMarshal marshals actual JSON payload and compares it with expected payload.
+func (c Comparer) EqualMarshal(t TestingT, expected []byte, actualValue interface{}, msgAndArgs ...interface{}) bool {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+
+	actual, err := json.Marshal(actualValue)
+	assert.NoError(t, err)
+
+	return c.Equal(t, expected, actual, msgAndArgs...)
 }
 
 func (c Comparer) filterDeltas(deltas []gojsondiff.Delta) []gojsondiff.Delta {

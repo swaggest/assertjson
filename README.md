@@ -2,7 +2,8 @@
 
 [![Build Status](https://github.com/swaggest/assertjson/workflows/test/badge.svg)](https://github.com/swaggest/assertjson/actions?query=branch%3Amaster+workflow%3Atest)
 [![Coverage Status](https://codecov.io/gh/swaggest/assertjson/branch/master/graph/badge.svg)](https://codecov.io/gh/swaggest/assertjson)
-[![GoDoc](https://godoc.org/github.com/swaggest/assertjson?status.svg)](https://godoc.org/github.com/swaggest/assertjson)
+[![GoDevDoc](https://img.shields.io/badge/dev-doc-00ADD8?logo=go)](https://pkg.go.dev/github.com/swaggest/assertjson)
+[![time tracker](https://wakatime.com/badge/github/swaggest/assertjson.svg)](https://wakatime.com/badge/github/swaggest/assertjson)
 
 This library extends awesome [`github.com/stretchr/testify/assert`](https://godoc.org/github.com/stretchr/testify/assert) 
 with nice JSON equality assertions built with [`github.com/yudai/gojsondiff`](https://github.com/yudai/gojsondiff).
