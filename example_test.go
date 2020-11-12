@@ -17,21 +17,21 @@ func Example() {
 	)
 
 	// Output:
-	// Error Trace:	equal.go:48
-	//	            				equal.go:36
-	//	            				example_test.go:14
-	//	Error:      	Not equal:
-	//	            	 {
-	//	            	   "a": [
-	//	            	     1,
-	//	            	     {
-	//	            	       "val": "<ignore-diff>"
-	//	            	     },
-	//	            	     3
-	//	            	   ],
-	//	            	-  "b": 2,
-	//	            	+  "b": 3,
-	//	            	-  "c": 3
-	//	            	+  "c": 2
-	//	            	 }
+	// Error Trace:	equal.go:69
+	// 	            				equal.go:44
+	// 	            				example_test.go:14
+	// 	Error:      	Not equal:
+	// 	            	 {
+	// 	            	   "a": [
+	// 	            	     1,
+	// 	            	     {
+	// 	            	       "val": "<ignore-diff>"
+	// 	            	     },
+	// 	            	     3
+	// 	            	   ],
+	// 	            	-  "b": 2,
+	// 	            	+  "b": 3,
+	// 	            	-  "c": 3
+	// 	            	+  "c": 2
+	// 	            	 }
 }
