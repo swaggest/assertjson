@@ -23,6 +23,10 @@ linters:
   disable:
     - goerr113
     - gochecknoglobals
+    - tparallel
+    - wrapcheck
+    - exhaustivestruct
+    - errorlint
 
 issues:
   exclude-use-default: false
