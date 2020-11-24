@@ -3,7 +3,7 @@ module github.com/swaggest/assertjson
 go 1.13
 
 require (
-	github.com/bool64/dev v0.1.6
+	github.com/bool64/dev v0.1.7
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/iancoleman/orderedmap v0.1.0
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
