@@ -46,7 +46,7 @@ func main() {
 		log.Fatalf("could not process input: %v", err)
 	}
 
-	err = ioutil.WriteFile(output, data, 0600)
+	err = ioutil.WriteFile(output, data, 0o600)
 	if err != nil {
 		log.Fatalf("could not write output: %v", err)
 	}
