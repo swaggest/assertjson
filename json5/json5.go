@@ -7,7 +7,6 @@ import (
 	"errors"
 	"io"
 
-	"github.com/iancoleman/orderedmap"
 	"github.com/vearutop/json5/encoding/json5"
 )
 
@@ -26,7 +25,7 @@ func Valid(data []byte) (isValid bool) {
 
 // Downgrade converts JSON5 to JSON.
 func Downgrade(data []byte) ([]byte, error) {
-	v := orderedmap.New()
+	v := json.RawMessage{}
 
 	err := Unmarshal(data, &v)
 	if err != nil {

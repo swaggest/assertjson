@@ -56,6 +56,33 @@ func TestDowngrade(t *testing.T) {
 	assert.Equal(t, `{"xyz":123,"abc":987}`, string(j))
 }
 
+func TestDowngrade_array(t *testing.T) {
+	j5 := `		[{
+		// XYZ.
+					"xyz": 123,
+		// ABC.
+		"abc": 987
+	}]`
+
+	assert.True(t, json5.Valid([]byte(j5)))
+	j, err := json5.Downgrade([]byte(j5))
+	require.NoError(t, err)
+
+	assert.Equal(t, `[{"xyz":123,"abc":987}]`, string(j))
+}
+
+func TestDowngrade_scalar(t *testing.T) {
+	j5 := `		
+		// XYZ.
+					"xyz"`
+
+	assert.True(t, json5.Valid([]byte(j5)))
+	j, err := json5.Downgrade([]byte(j5))
+	require.NoError(t, err)
+
+	assert.Equal(t, `"xyz"`, string(j))
+}
+
 func TestUnmarshal(t *testing.T) {
 	j5 := `		{
 		// XYZ.
