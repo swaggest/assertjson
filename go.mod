@@ -1,6 +1,6 @@
 module github.com/swaggest/assertjson
 
-go 1.13
+go 1.11
 
 require (
 	github.com/bool64/dev v0.1.10
