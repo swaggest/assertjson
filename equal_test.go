@@ -157,3 +157,67 @@ func TestEqualMarshal(t *testing.T) {
 
 	assertjson.EqualMarshal(t, []byte(`{"a":123,"b":"abc"}`), v)
 }
+
+func TestEqual_order(t *testing.T) {
+	exp := []byte(`{
+      "context": {
+        "errors": {
+          "query:box_sku": [
+            "missing value"
+          ],
+          "query:country": [
+            "missing value"
+          ],
+          "query:course_index[]": [
+            "missing value"
+          ],
+          "query:customer_id": [
+            "missing value"
+          ],
+          "query:should_propagate_charge_event": [
+            "missing value"
+          ],
+          "query:subscription_id": [
+            "missing value"
+          ],
+          "query:week": [
+            "#: does not match pattern \"^[0-9]{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$\""
+          ]
+        }
+      },
+      "error": "validation failed",
+      "status": "INVALID_ARGUMENT"
+    }`)
+
+	act := []byte(`{
+      "context": {
+        "errors": {
+          "query:box_sku": [
+            "missing value"
+          ],
+          "query:country": [
+            "missing value"
+          ],
+          "query:customer_id": [
+            "missing value"
+          ],
+          "query:should_propagate_charge_event": [
+            "missing value"
+          ],
+          "query:subscription_id": [
+            "missing value"
+          ],
+          "query:week": [
+            "#: does not match pattern \"^[0-9]{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$\""
+          ],
+          "query:course_index[]": [
+            "missing value"
+          ]
+        }
+      },
+      "error": "validation failed",
+      "status": "INVALID_ARGUMENT"
+    }`)
+
+	assertjson.Equal(t, exp, act)
+}
