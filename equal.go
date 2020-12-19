@@ -174,7 +174,7 @@ func (c Comparer) filterExpected(expected []byte) ([]byte, error) {
 		for k, v := range c.Vars.GetAll() {
 			j, err := json.Marshal(v)
 			if err != nil {
-				return nil, fmt.Errorf("failed to marshal var %s: %w", k, err)
+				return nil, fmt.Errorf("failed to marshal var %s: %v", k, err) // Not wrapping to support go1.12.
 			}
 
 			expected = bytes.Replace(expected, []byte(`"`+k+`"`), j, -1) // nolint:gocritic // To support go1.11.
