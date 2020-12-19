@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/bool64/shared"
 	"github.com/stretchr/testify/assert"
 	"github.com/swaggest/assertjson"
 )
@@ -57,9 +58,9 @@ func TestEquals_message(t *testing.T) {
 		assert.Equal(t, "\n%s", format)
 		assert.Len(t, args, 1)
 
-		assert.Equal(t, `	Error Trace:	equal.go:69
-	            				equal.go:44
-	            				equal_test.go:56
+		assert.Equal(t, `	Error Trace:	equal.go:77
+	            				equal.go:52
+	            				equal_test.go:57
 	Error:      	Not equal:
 	            	 {
 	            	   "createdAt": "<ignore-diff>",
@@ -156,4 +157,46 @@ func TestEqualMarshal(t *testing.T) {
 	}
 
 	assertjson.EqualMarshal(t, []byte(`{"a":123,"b":"abc"}`), v)
+}
+
+func TestComparer_Equal_vars(t *testing.T) {
+	v := &shared.Vars{}
+	v.Set("$varB", []int{1, 2, 3})
+	v.Set("$varC", "abc")
+
+	// Properties "b" and "c" are checked against values defined in vars.
+	// Properties "a" and "d" are not checked, but their values are assigned to missing vars.
+	exp := []byte(`{"a": "$varA", "b": "$varB", "c": "$varC", "d": "$varD"}`)
+	act := []byte(`{"a": 1.23, "b": [1, 2, 3], "c": "abc", "d": 4}`)
+
+	c := assertjson.Comparer{Vars: v}
+
+	c.Equal(t, exp, act)
+
+	val, found := v.Get("$varA")
+	assert.True(t, found)
+	assert.Equal(t, 1.23, val)
+
+	val, found = v.Get("$varD")
+	assert.True(t, found)
+	assert.Equal(t, int64(4), val)
+
+	c.Equal(t, exp, act)
+
+	// Change act to have difference with exp.
+	act = []byte(`{"a": 1.23, "b": [1, 2, 4], "c": "abc", "d": 4}`)
+	err := c.FailNotEqual(exp, act)
+	assert.EqualError(t, err, `not equal:
+ {
+   "a": 1.23,
+   "b": [
+     1,
+     2,
+-    3
++    4
+   ],
+   "c": "abc",
+   "d": 4
+ }
+`)
 }
