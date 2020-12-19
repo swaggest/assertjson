@@ -177,7 +177,7 @@ func (c Comparer) filterExpected(expected []byte) ([]byte, error) {
 				return nil, fmt.Errorf("failed to marshal var %s: %w", k, err)
 			}
 
-			expected = bytes.ReplaceAll(expected, []byte(`"`+k+`"`), j)
+			expected = bytes.Replace(expected, []byte(`"`+k+`"`), j, -1) // nolint:gocritic // To support go1.11.
 		}
 	}
 
