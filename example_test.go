@@ -17,8 +17,8 @@ func Example() {
 	)
 
 	// Output:
-	// Error Trace:	equal.go:69
-	// 	            				equal.go:44
+	// Error Trace:	equal.go:77
+	// 	            				equal.go:52
 	// 	            				example_test.go:14
 	// 	Error:      	Not equal:
 	// 	            	 {

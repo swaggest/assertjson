@@ -2,12 +2,14 @@
 package assertjson
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
 	"strings"
 
+	"github.com/bool64/shared"
 	"github.com/stretchr/testify/assert"
 	"github.com/yudai/gojsondiff"
 	"github.com/yudai/gojsondiff/formatter"
@@ -18,12 +20,18 @@ type Comparer struct {
 	// IgnoreDiff is a value in expected document to ignore difference with actual document.
 	IgnoreDiff string
 
+	// Vars keeps state of found variables.
+	Vars *shared.Vars
+
 	// FormatterConfig controls diff formatter configuration.
 	FormatterConfig formatter.AsciiFormatterConfig
 }
 
+// IgnoreDiff is a marker to ignore difference in JSON.
+const IgnoreDiff = "<ignore-diff>"
+
 var defaultComparer = Comparer{
-	IgnoreDiff: "<ignore-diff>",
+	IgnoreDiff: IgnoreDiff,
 }
 
 // TestingT is an interface wrapper around *testing.T.
@@ -87,18 +95,40 @@ func (c Comparer) EqualMarshal(t TestingT, expected []byte, actualValue interfac
 	return c.Equal(t, expected, actual, msgAndArgs...)
 }
 
+func (c Comparer) varCollected(s string, v interface{}) bool {
+	if c.Vars != nil && c.Vars.IsVar(s) {
+		if _, found := c.Vars.Get(s); !found {
+			if f, ok := v.(float64); ok && f == float64(int64(f)) {
+				v = int64(f)
+			}
+
+			c.Vars.Set(s, v)
+
+			return true
+		}
+	}
+
+	return false
+}
+
 func (c Comparer) filterDeltas(deltas []gojsondiff.Delta) []gojsondiff.Delta {
 	result := make([]gojsondiff.Delta, 0, len(deltas))
 
 	for _, delta := range deltas {
 		switch v := delta.(type) {
 		case *gojsondiff.Modified:
-			if c.IgnoreDiff == "" {
+			if c.IgnoreDiff == "" && c.Vars == nil {
 				break
 			}
 
-			if s, ok := v.OldValue.(string); ok && s == c.IgnoreDiff { // discarding ignored diff
-				continue
+			if s, ok := v.OldValue.(string); ok {
+				if s == c.IgnoreDiff { // discarding ignored diff
+					continue
+				}
+
+				if c.varCollected(s, v.NewValue) {
+					continue
+				}
 			}
 		case *gojsondiff.Object:
 			v.Deltas = c.filterDeltas(v.Deltas)
@@ -139,6 +169,21 @@ func FailNotEqual(expected, actual []byte) error {
 	return defaultComparer.FailNotEqual(expected, actual)
 }
 
+func (c Comparer) filterExpected(expected []byte) ([]byte, error) {
+	if c.Vars != nil {
+		for k, v := range c.Vars.GetAll() {
+			j, err := json.Marshal(v)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal var %s: %v", k, err) // Not wrapping to support go1.12.
+			}
+
+			expected = bytes.Replace(expected, []byte(`"`+k+`"`), j, -1) // nolint:gocritic // To support go1.11.
+		}
+	}
+
+	return expected, nil
+}
+
 // FailNotEqual returns error if JSON payloads are different, nil otherwise.
 func (c Comparer) FailNotEqual(expected, actual []byte) error {
 	var (
@@ -146,7 +191,12 @@ func (c Comparer) FailNotEqual(expected, actual []byte) error {
 		diffValue              gojsondiff.Diff
 	)
 
-	err := json.Unmarshal(expected, &expDecoded)
+	expected, err := c.filterExpected(expected)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(expected, &expDecoded)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal expected:\n%+v", err)
 	}
