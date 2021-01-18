@@ -3,11 +3,11 @@ module github.com/swaggest/assertjson
 go 1.11
 
 require (
-	github.com/bool64/dev v0.1.10
-	github.com/bool64/shared v0.1.0
+	github.com/bool64/dev v0.1.15
+	github.com/bool64/shared v0.1.1
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/go-cmp v0.5.4 // indirect
-	github.com/iancoleman/orderedmap v0.1.0
+	github.com/iancoleman/orderedmap v0.1.2
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
@@ -27,5 +27,5 @@ require (
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
