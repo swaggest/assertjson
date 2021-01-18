@@ -98,6 +98,7 @@ func run(
 	cases []testcase,
 	equal func(t assertjson.TestingT, expected, actual []byte, msgAndArgs ...interface{}) bool,
 ) {
+	t.Helper()
 	t.Parallel()
 
 	tt := testingT(func(format string, args ...interface{}) {})

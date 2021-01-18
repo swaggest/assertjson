@@ -2,6 +2,7 @@ package assertjson
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/iancoleman/orderedmap"
 )
@@ -35,7 +36,7 @@ func MarshalIndentCompact(v interface{}, prefix, indent string, lineLen int) ([]
 
 	i, ok := m.Get("t")
 	if !ok {
-		return nil, orderedmap.NoValueError
+		return nil, errors.New("no value for this key")
 	}
 
 	// Create first level padding.

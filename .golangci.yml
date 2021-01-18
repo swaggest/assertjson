@@ -27,6 +27,7 @@ linters:
     - wrapcheck
     - exhaustivestruct
     - errorlint
+    - forbidigo
 
 issues:
   exclude-use-default: false
@@ -36,4 +37,5 @@ issues:
         - goconst
         - funlen
         - dupl
+        - paralleltest
       path: "_test.go"
