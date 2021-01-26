@@ -201,3 +201,26 @@ func TestComparer_Equal_vars(t *testing.T) {
  }
 `)
 }
+
+func TestComparer_Equal_vars_scalar(t *testing.T) {
+	v := &shared.Vars{}
+	c := assertjson.Comparer{Vars: v}
+
+	assert.NoError(t, c.FailNotEqual([]byte(`["$varA"]`), []byte("[123]")))
+
+	a, found := v.Get("$varA")
+
+	assert.True(t, found)
+	assert.Equal(t, int64(123), a)
+
+	assert.NoError(t, c.FailNotEqual([]byte(`"$varB"`), []byte(`[123]`)))
+	assert.EqualError(t, c.FailNotEqual([]byte(`"$varB"`), []byte(`[124]`)),
+		"not equal:\n [\n-  123\n+  124\n ]\n")
+
+	assert.NoError(t, c.FailNotEqual([]byte(`"$varB"`), []byte(`[123]`)))
+
+	b, found := v.Get("$varB")
+
+	assert.True(t, found)
+	assert.Equal(t, []interface{}{123.0}, b)
+}
