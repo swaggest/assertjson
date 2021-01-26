@@ -184,12 +184,34 @@ func (c Comparer) filterExpected(expected []byte) ([]byte, error) {
 	return expected, nil
 }
 
+func (c Comparer) compare(expDecoded, actDecoded interface{}) (gojsondiff.Diff, error) {
+	switch v := expDecoded.(type) {
+	case []interface{}:
+		if actArray, ok := actDecoded.([]interface{}); ok {
+			return gojsondiff.New().CompareArrays(v, actArray), nil
+		}
+
+		return nil, errors.New("types mismatch, array expected")
+
+	case map[string]interface{}:
+		if actObject, ok := actDecoded.(map[string]interface{}); ok {
+			return gojsondiff.New().CompareObjects(v, actObject), nil
+		}
+
+		return nil, errors.New("types mismatch, object expected")
+
+	default:
+		if !reflect.DeepEqual(expDecoded, actDecoded) { // scalar value comparison
+			return nil, fmt.Errorf("values %v and %v are not equal", expDecoded, actDecoded)
+		}
+	}
+
+	return nil, nil
+}
+
 // FailNotEqual returns error if JSON payloads are different, nil otherwise.
 func (c Comparer) FailNotEqual(expected, actual []byte) error {
-	var (
-		expDecoded, actDecoded interface{}
-		diffValue              gojsondiff.Diff
-	)
+	var expDecoded, actDecoded interface{}
 
 	expected, err := c.filterExpected(expected)
 	if err != nil {
@@ -206,25 +228,19 @@ func (c Comparer) FailNotEqual(expected, actual []byte) error {
 		return fmt.Errorf("failed to unmarshal actual:\n%+v", err)
 	}
 
-	switch v := expDecoded.(type) {
-	case []interface{}:
-		if actArray, ok := actDecoded.([]interface{}); ok {
-			diffValue = gojsondiff.New().CompareArrays(v, actArray)
-		} else {
-			return errors.New("types mismatch, array expected")
+	if s, ok := expDecoded.(string); ok && c.Vars != nil && c.Vars.IsVar(s) {
+		if c.varCollected(s, actDecoded) {
+			return nil
 		}
 
-	case map[string]interface{}:
-		if actObject, ok := actDecoded.(map[string]interface{}); ok {
-			diffValue = gojsondiff.New().CompareObjects(v, actObject)
-		} else {
-			return errors.New("types mismatch, object expected")
+		if v, found := c.Vars.Get(s); found {
+			expDecoded = v
 		}
+	}
 
-	default:
-		if !reflect.DeepEqual(expDecoded, actDecoded) { // scalar value comparison
-			return fmt.Errorf("values %v and %v are not equal", expDecoded, actDecoded)
-		}
+	diffValue, err := c.compare(expDecoded, actDecoded)
+	if err != nil {
+		return err
 	}
 
 	if diffValue == nil {
