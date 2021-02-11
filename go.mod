@@ -3,8 +3,8 @@ module github.com/swaggest/assertjson
 go 1.11
 
 require (
-	github.com/bool64/dev v0.1.15
-	github.com/bool64/shared v0.1.1
+	github.com/bool64/dev v0.1.17
+	github.com/bool64/shared v0.1.2
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/iancoleman/orderedmap v0.1.2
@@ -15,7 +15,7 @@ require (
 	github.com/onsi/ginkgo v1.14.2 // indirect
 	github.com/onsi/gomega v1.10.4 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.4.0
 	github.com/vearutop/json5 v0.1.2
 	github.com/yudai/gojsondiff v1.0.0
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
@@ -27,5 +27,4 @@ require (
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
