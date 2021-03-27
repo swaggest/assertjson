@@ -16,14 +16,10 @@ linters-settings:
     check-exported: false
   unparam:
     check-exported: true
-  cyclop:
-    max-complexity: 15
 
 linters:
   enable-all: true
   disable:
-    - goerr113
-    - errorlint
     - lll
     - maligned
     - gochecknoglobals
@@ -45,6 +41,5 @@ issues:
         - noctx
         - funlen
         - dupl
-        - tparallel
       path: "_test.go"
 
