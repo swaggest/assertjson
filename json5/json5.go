@@ -7,7 +7,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/vearutop/json5/encoding/json5"
+	"github.com/yosuke-furukawa/json5/encoding/json5"
 )
 
 // Valid checks if bytes are a valid JSON5 payload.
