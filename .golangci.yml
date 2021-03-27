@@ -16,10 +16,15 @@ linters-settings:
     check-exported: false
   unparam:
     check-exported: true
+  cyclop:
+    max-complexity: 15
 
 linters:
   enable-all: true
   disable:
+    - tparallel
+    - goerr113
+    - errorlint
     - lll
     - maligned
     - gochecknoglobals
