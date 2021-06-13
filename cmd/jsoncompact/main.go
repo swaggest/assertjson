@@ -13,7 +13,7 @@ import (
 	"github.com/swaggest/assertjson"
 )
 
-// nolint:funlen // The function is a bit lengthy, but I'm not sure it
+// nolint // The function is a bit lengthy, but I'm not sure it
 // would be more approachable if split in several functions.
 func main() {
 	var (
@@ -45,47 +45,49 @@ func main() {
 		return
 	}
 
-	matches, err := filepath.Glob(input)
-	if err != nil {
-		log.Fatalf("could not read input: %v", err)
-	}
-
-	for _, m := range matches {
-		if verbose {
-			log.Printf("compacting %s.\n", m)
-		}
-
-		// nolint:gosec // Intentional file reading.
-		orig, err := ioutil.ReadFile(m)
+	for _, in := range flag.Args() {
+		matches, err := filepath.Glob(in)
 		if err != nil {
-			log.Fatalf("could not read input %s: %v", m, err)
+			log.Fatalf("could not read input: %v", err)
 		}
 
-		comp, err := assertjson.MarshalIndentCompact(json.RawMessage(orig), prefix, indent, length)
-		if err != nil {
-			log.Fatalf("could not process input: %v", err)
-		}
-
-		if bytes.Equal(orig, comp) {
+		for _, m := range matches {
 			if verbose {
-				log.Printf("already compact, skipping %s\n", m)
+				log.Printf("compacting %s.\n", m)
 			}
 
-			continue
-		}
+			// nolint:gosec // Intentional file reading.
+			orig, err := ioutil.ReadFile(m)
+			if err != nil {
+				log.Fatalf("could not read input %s: %v", m, err)
+			}
 
-		out := output
-		if out == "" {
-			out = m
-		}
+			comp, err := assertjson.MarshalIndentCompact(json.RawMessage(orig), prefix, indent, length)
+			if err != nil {
+				log.Fatalf("could not process input: %v", err)
+			}
 
-		if verbose {
-			log.Printf("writing to %s\n", out)
-		}
+			if bytes.Equal(orig, comp) {
+				if verbose {
+					log.Printf("already compact, skipping %s\n", m)
+				}
 
-		err = ioutil.WriteFile(out, comp, 0600)
-		if err != nil {
-			log.Fatalf("could not write output to %s: %v", out, err)
+				continue
+			}
+
+			out := output
+			if out == "" {
+				out = m
+			}
+
+			if verbose {
+				log.Printf("writing to %s\n", out)
+			}
+
+			err = ioutil.WriteFile(out, comp, 0600)
+			if err != nil {
+				log.Fatalf("could not write output to %s: %v", out, err)
+			}
 		}
 	}
 }
