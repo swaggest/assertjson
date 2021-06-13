@@ -1,4 +1,7 @@
-#GOLANGCI_LINT_VERSION := "v1.38.0" # Optional configuration to pinpoint golangci-lint version.
+# Override in app Makefile to control build target, example BUILD_PKG=./cmd/my-app
+BUILD_PKG ?= ./cmd/jsoncompact
+
+#GOLANGCI_LINT_VERSION := "v1.40.1" # Optional configuration to pinpoint golangci-lint version.
 
 # The head of Makefile determines location of dev-go to include standard targets.
 GO ?= go
@@ -30,7 +33,11 @@ endif
 -include $(DEVGO_PATH)/makefiles/main.mk
 -include $(DEVGO_PATH)/makefiles/lint.mk
 -include $(DEVGO_PATH)/makefiles/test-unit.mk
+-include $(DEVGO_PATH)/makefiles/build.mk
+-include $(DEVGO_PATH)/makefiles/release-assets.mk
 -include $(DEVGO_PATH)/makefiles/reset-ci.mk
+
+# Add your custom targets here.
 
 ## Run tests
 test: test-unit

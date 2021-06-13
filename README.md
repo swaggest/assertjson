@@ -189,3 +189,26 @@ Available as `jsoncompact` CLI tool.
 ```
 go get github.com/swaggest/assertjson/cmd/jsoncompact
 ```
+
+You can invoke the tool against one or more JSON files, for example:
+
+```
+jsoncompact some-*.json path/to/another/*.json
+```
+
+Additional flags.
+
+```
+Usage of jsoncompact:
+  -indent string
+        Set indent. (default " ")
+  -len int
+        Line length limit. (default 100)
+  -output string
+        Path to output json file, if not specified input file is used.
+  -prefix string
+        Set prefix.
+  -v    Verbose mode.
+  -version
+        Print version and exit.
+```
