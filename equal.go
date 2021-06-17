@@ -25,6 +25,17 @@ type Comparer struct {
 
 	// FormatterConfig controls diff formatter configuration.
 	FormatterConfig formatter.AsciiFormatterConfig
+
+	// KeepFullDiff shows full diff in error message.
+	KeepFullDiff bool
+
+	// FullDiffMaxLines is a maximum number of lines to show without reductions, default 50.
+	// Ignored if KeepFullDiff is true.
+	FullDiffMaxLines int
+
+	// DiffSurroundingLines is a number of lines to add before and after diff line, default 5.
+	// Ignored if KeepFullDiff is true.
+	DiffSurroundingLines int
 }
 
 // IgnoreDiff is a marker to ignore difference in JSON.
@@ -261,5 +272,62 @@ func (c Comparer) FailNotEqual(expected, actual []byte) error {
 		return fmt.Errorf("failed to format diff:\n%+v", err)
 	}
 
+	diffText = c.reduceDiff(diffText)
+
 	return errors.New("not equal:\n" + diffText)
+}
+
+func (c Comparer) reduceDiff(diffText string) string {
+	if c.KeepFullDiff {
+		return diffText
+	}
+
+	if c.FullDiffMaxLines == 0 {
+		c.FullDiffMaxLines = 50
+	}
+
+	if c.DiffSurroundingLines == 0 {
+		c.DiffSurroundingLines = 5
+	}
+
+	diffRows := strings.Split(diffText, "\n")
+	if len(diffRows) <= c.FullDiffMaxLines {
+		return diffText
+	}
+
+	var result []string
+
+	prev := 0
+
+	for i, r := range diffRows {
+		if len(r) == 0 {
+			continue
+		}
+
+		if r[0] == '-' || r[0] == '+' {
+			start := i - c.DiffSurroundingLines
+			if start < prev {
+				start = prev
+			} else if start > prev {
+				result = append(result, "...")
+			}
+
+			end := i + c.DiffSurroundingLines
+			if end >= len(diffRows) {
+				end = len(diffRows) - 1
+			}
+
+			prev = end
+
+			for k := start; k < end; k++ {
+				result = append(result, diffRows[k])
+			}
+		}
+	}
+
+	if prev < len(diffRows)-1 {
+		result = append(result, "...")
+	}
+
+	return strings.Join(result, "\n")
 }

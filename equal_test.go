@@ -1,6 +1,7 @@
 package assertjson_test
 
 import (
+	"io/ioutil"
 	"strconv"
 	"testing"
 
@@ -58,9 +59,9 @@ func TestEquals_message(t *testing.T) {
 		assert.Equal(t, "\n%s", format)
 		assert.Len(t, args, 1)
 
-		assert.Equal(t, `	Error Trace:	equal.go:77
-	            				equal.go:52
-	            				equal_test.go:57
+		assert.Equal(t, `	Error Trace:	equal.go:88
+	            				equal.go:63
+	            				equal_test.go:58
 	Error:      	Not equal:
 	            	 {
 	            	   "createdAt": "<ignore-diff>",
@@ -223,4 +224,115 @@ func TestComparer_Equal_vars_scalar(t *testing.T) {
 
 	assert.True(t, found)
 	assert.Equal(t, []interface{}{123.0}, b)
+}
+
+func TestComparer_Equal_long(t *testing.T) {
+	long, err := ioutil.ReadFile("_testdata/long-expected.json")
+	assert.NoError(t, err)
+
+	longOther, err := ioutil.ReadFile("_testdata/long-actual.json")
+	assert.NoError(t, err)
+
+	c := assertjson.Comparer{}
+
+	err = c.FailNotEqual(long, longOther)
+
+	assert.EqualError(t, err, `not equal:
+...
+     "This file locks the dependencies of your project to a known state",
+     "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+     "This file is @generated automatically"
+   ],
+   "aliases": [
++    "ehm"
+   ],
+   "content-hash": "f0ff2afe7ca18fda8104ff02b06a8d98",
+   "minimum-stability": "stable",
+   "packages": [
+...
+       "notification-url": "https://packagist.org/downloads/",
+       "require": {
+         "ext-json": "*"
+       },
+       "require-dev": {
+-        "phpunit/phpunit": "^4.8.23"
++        "phpunit/phpunit": "^4.8.24"
+       },
+       "source": {
+         "reference": "d2184358c5ef5ecaa1f6b4c2bce175fac2d25670",
+         "type": "git",
+         "url": "https://github.com/swaggest/json-diff.git"
+       },
+       "support": {
+         "issues": "https://github.com/swaggest/json-diff/issues",
+-        "source": "https://github.com/swaggest/json-diff/tree/v3.8.1"
++        "source": "https://github.com/swaggest/json-diff/tree/v3.8.2"
+       },
+       "time": "2020-09-25T17:47:07+00:00",
+-      "type": "library",
++      "type": "app",
+       "version": "v3.8.1"
+     }
+   ],
+   "packages-dev": [
+...
+         "shasum": "",
+         "type": "zip",
+         "url": "https://api.github.com/repos/phpDocumentor/ReflectionDocBlock/zipball/bf329f6c1aadea3299f08ee804682b7c45b326a2"
+       },
+       "license": [
++        "BSD3"
++        "Apache 2.0"
+       ],
+       "name": "phpdocumentor/reflection-docblock",
+       "notification-url": "https://packagist.org/downloads/",
+       "require": {
+...
+         "php": "^5.5 || ^7.0",
+         "phpdocumentor/reflection-common": "^1.0"
+       },
+       "require-dev": {
+         "mockery/mockery": "^0.9.4",
+-        "phpunit/phpunit": "^5.2||^4.8.24"
++        "phpunit/phpunit": "^5.2&&^4.8.24"
+       },
+       "source": {
+         "reference": "9c977708995954784726e25d0cd1dddf4e65b0f7",
+         "type": "git",
+...
+       "autoload": {
+         "classmap": [
+           "src/"
+         ]
+       },
+-      "description": "FilterIterator implementation that filters files based on a list of suffixes.",
++      "description": "FilterIterator implementation that filterers files based on a list of suffixes.",
+       "dist": {
+         "reference": "730b01bc3e867237eaac355e06a36b85dd93a8b4",
+         "shasum": "",
+         "type": "zip",
+...
+         "type": "git",
+         "url": "https://github.com/webmozarts/assert.git"
+       },
+       "support": {
+         "issues": "https://github.com/webmozarts/assert/issues",
+-        "source": "https://github.com/webmozarts/assert/tree/1.9.1"
++        "source": "https://github.com/webmozarts/assert/tree/1.9.2"
+       },
+       "time": "2020-07-08T17:02:28+00:00",
+       "type": "library",
+       "version": "1.9.1"
+...
+     "ext-json": "*",
+     "ext-mbstring": "*",
+     "php": ">=5.4"
+   },
+   "platform-dev": [
++    "whoa"
+   ],
+   "platform-overrides": {
+     "php": "5.6.0"
+   },
+...`)
 }
