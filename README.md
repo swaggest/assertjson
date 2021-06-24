@@ -184,6 +184,8 @@ j, err := assertjson.MarshalIndentCompact(v, "", "  ", 100) // 100 is line width
 }
 ```
 
+### CLI Tool
+
 Available as `jsoncompact` CLI tool.
 
 ```
