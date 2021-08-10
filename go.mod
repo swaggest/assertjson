@@ -3,7 +3,7 @@ module github.com/swaggest/assertjson
 go 1.11
 
 require (
-	github.com/bool64/dev v0.1.35
+	github.com/bool64/dev v0.1.37
 	github.com/bool64/shared v0.1.3
 	github.com/iancoleman/orderedmap v0.2.0
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect

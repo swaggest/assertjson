@@ -1,7 +1,7 @@
 # Override in app Makefile to control build target, example BUILD_PKG=./cmd/my-app
 BUILD_PKG ?= ./cmd/jsoncompact
 
-#GOLANGCI_LINT_VERSION := "v1.40.1" # Optional configuration to pinpoint golangci-lint version.
+#GOLANGCI_LINT_VERSION := "v1.41.1" # Optional configuration to pinpoint golangci-lint version.
 
 # The head of Makefile determines location of dev-go to include standard targets.
 GO ?= go
