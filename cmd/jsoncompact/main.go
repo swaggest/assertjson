@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 
 	"github.com/bool64/dev/version"
@@ -39,8 +40,27 @@ func main() {
 
 	input = flag.Arg(0)
 	if input == "" {
-		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Missing input path argument.")
+		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Missing input path argument, use `-` for stdin.")
 		flag.Usage()
+
+		return
+	}
+
+	// Read stdin.
+	if input == "-" {
+		var v interface{}
+
+		dec := json.NewDecoder(os.Stdin)
+		err := dec.Decode(&v)
+		if err != nil {
+			log.Fatalf("could not process input: %v", err)
+		}
+
+		comp, err := assertjson.MarshalIndentCompact(v, prefix, indent, length)
+		if err != nil {
+			log.Fatalf("could not process input: %v", err)
+		}
+		fmt.Println(string(comp))
 
 		return
 	}
