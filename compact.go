@@ -1,6 +1,7 @@
 package assertjson
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,7 +14,7 @@ import (
 // Line length limits indented width of JSON structure, does not apply to long distinct scalars.
 // This function is not optimized for performance, so it might be not a good fit for high load scenarios.
 func MarshalIndentCompact(v interface{}, prefix, indent string, lineLen int) ([]byte, error) {
-	b, err := json.Marshal(v)
+	b, err := marshalUnescaped(v)
 	if err != nil {
 		return nil, err
 	}
@@ -47,9 +48,25 @@ func MarshalIndentCompact(v interface{}, prefix, indent string, lineLen int) ([]
 	return marshalIndentCompact(i, indent, pad, lineLen)
 }
 
+func marshalUnescaped(v interface{}) ([]byte, error) {
+	buf := bytes.NewBuffer(nil)
+	enc := json.NewEncoder(buf)
+	enc.SetEscapeHTML(false)
+
+	err := enc.Encode(v)
+	if err != nil {
+		return nil, err
+	}
+
+	data := buf.Bytes()
+	data = data[0 : len(data)-1] // Strip trailing '\n'.
+
+	return data, nil
+}
+
 func marshalIndentCompact(doc interface{}, indent string, pad []byte, lineLen int) ([]byte, error) {
 	// Build compact JSON for provided sub document.
-	compact, err := json.Marshal(doc)
+	compact, err := marshalUnescaped(doc)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +155,7 @@ func marshalObject(o orderedmap.OrderedMap, compactLen int, indent string, pad [
 		}
 
 		// Marshal key as JSON string.
-		kj, err := json.Marshal(k)
+		kj, err := marshalUnescaped(k)
 		if err != nil {
 			return nil, err
 		}
