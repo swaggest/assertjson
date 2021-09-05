@@ -12,7 +12,7 @@ import (
 
 func TestMarshalIndentCompact(t *testing.T) {
 	// nolint:lll // Yeah, this line is loooong, but that's ok.
-	j := []byte(`{"openapi":"3.0.2","info":{"title":"","version":""},"paths":{"/test/{in-path}":{"post":{"summary":"Title","description":"","operationId":"name","x-some-array":["abc","def",123456,7890123456,[],{"foo":"bar"},"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!"],"parameters":[{"name":"in_query","in":"query","schema":{"type":"integer"}},{"name":"in-path","in":"path","required":true,"schema":{"type":"boolean"}},{"name":"in_cookie","in":"cookie","schema":{"type":"number"}},{"name":"X-In-Header","in":"header","schema":{"type":"string"}}],"requestBody":{"content":{"application/x-www-form-urlencoded":{"schema":{"$ref":"#/components/schemas/FormDataOpenapiTestInput"}}}},"responses":{"200":{"description":"OK","content":{"application/json":{"schema":{}}}}},"deprecated":true}}},"components":{"schemas":{"FormDataOpenapiTestInput":{"type":"object","properties":{"in_form_data":{"type":"string"}}}}}}`)
+	j := []byte(`{"openapi":"3.0.2","info":{"title":"","version":""},"paths":{"/test/{in-path}":{"post":{"summary":"Title","description":"","operationId":"name","x-some-array":["abc","def",123456,7890123456,[],{"foo":"bar"},"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!<>"],"parameters":[{"name":"in_query","in":"query","schema":{"type":"integer"}},{"name":"in-path","in":"path","required":true,"schema":{"type":"boolean"}},{"name":"in_cookie","in":"cookie","schema":{"type":"number"}},{"name":"X-In-Header","in":"header","schema":{"type":"string"}}],"requestBody":{"content":{"application/x-www-form-urlencoded":{"schema":{"$ref":"#/components/schemas/FormDataOpenapiTestInput"}}}},"responses":{"200":{"description":"OK","content":{"application/json":{"schema":{}}}}},"deprecated":true}}},"components":{"schemas":{"FormDataOpenapiTestInput":{"type":"object","properties":{"in_form_data":{"type":"string"}}}}}}`)
 	v := orderedmap.New()
 	assert.NoError(t, json.Unmarshal(j, &v))
 
@@ -26,7 +26,7 @@ XXXYYYYYY"post":{
 XXXYYYYYYYY"summary":"Title","description":"","operationId":"name",
 XXXYYYYYYYY"x-some-array":[
 XXXYYYYYYYYYY"abc","def",123456,7890123456,[],{"foo":"bar"},
-XXXYYYYYYYYYY"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!"
+XXXYYYYYYYYYY"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!<>"
 XXXYYYYYYYY],
 XXXYYYYYYYY"parameters":[
 XXXYYYYYYYYYY{"name":"in_query","in":"query","schema":{"type":"integer"}},
@@ -63,7 +63,7 @@ XXX}`, string(jjj))
         "summary":"Title","description":"","operationId":"name",
         "x-some-array":[
           "abc","def",123456,7890123456,[],{"foo":"bar"},
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!"
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!<>"
         ],
         "parameters":[
           {"name":"in_query","in":"query","schema":{"type":"integer"}},
