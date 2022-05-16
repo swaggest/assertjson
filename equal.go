@@ -180,6 +180,11 @@ func FailNotEqual(expected, actual []byte) error {
 	return defaultComparer.FailNotEqual(expected, actual)
 }
 
+// FailNotEqualMarshal returns error if expected JSON payload is not equal to marshaled actual value.
+func FailNotEqualMarshal(expected []byte, actualValue interface{}) error {
+	return defaultComparer.FailNotEqualMarshal(expected, actualValue)
+}
+
 func (c Comparer) filterExpected(expected []byte) ([]byte, error) {
 	if c.Vars != nil {
 		for k, v := range c.Vars.GetAll() {
@@ -218,6 +223,16 @@ func (c Comparer) compare(expDecoded, actDecoded interface{}) (gojsondiff.Diff, 
 	}
 
 	return nil, nil
+}
+
+// FailNotEqualMarshal returns error if expected JSON payload is not equal to marshaled actual value.
+func (c Comparer) FailNotEqualMarshal(expected []byte, actualValue interface{}) error {
+	actual, err := MarshalIndentCompact(actualValue, "", "  ", 80)
+	if err != nil {
+		return err
+	}
+
+	return c.FailNotEqual(expected, actual)
 }
 
 // FailNotEqual returns error if JSON payloads are different, nil otherwise.
