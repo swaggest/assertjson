@@ -23,14 +23,19 @@ ifeq ($(DEVGO_PATH),)
 	DEVGO_PATH := $(shell GO111MODULE=on $(GO) list ${modVendor} -f '{{.Dir}}' -m github.com/bool64/dev)
 	ifeq ($(DEVGO_PATH),)
     	$(info Module github.com/bool64/dev not found, downloading.)
-    	DEVGO_PATH := $(shell export GO111MODULE=on && $(GO) get github.com/bool64/dev && $(GO) list -f '{{.Dir}}' -m github.com/bool64/dev)
+    	DEVGO_PATH := $(shell export GO111MODULE=on && $(GO) mod tidy && $(GO) list -f '{{.Dir}}' -m github.com/bool64/dev)
 	endif
 endif
+
+# Override in app Makefile to control build target, example BUILD_PKG=./cmd/my-app
+BUILD_PKG ?= ./cmd/jsoncompact
+
 
 -include $(DEVGO_PATH)/makefiles/main.mk
 -include $(DEVGO_PATH)/makefiles/lint.mk
 -include $(DEVGO_PATH)/makefiles/test-unit.mk
--include $(DEVGO_PATH)/makefiles/bench.mk
+-include $(DEVGO_PATH)/makefiles/build.mk
+-include $(DEVGO_PATH)/makefiles/release-assets.mk
 -include $(DEVGO_PATH)/makefiles/reset-ci.mk
 
 # Add your custom targets here.
