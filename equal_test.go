@@ -161,6 +161,19 @@ func TestEqualMarshal(t *testing.T) {
 	assertjson.EqualMarshal(t, []byte(`{"a":123,"b":"abc"}`), v)
 }
 
+func TestFailNotEqualMarshal(t *testing.T) {
+	v := struct {
+		A int    `json:"a"`
+		B string `json:"b"`
+	}{
+		A: 123,
+		B: "abc",
+	}
+
+	err := assertjson.FailNotEqualMarshal([]byte(`{"a":123,"b":"abc"}`), v)
+	assert.NoError(t, err)
+}
+
 func TestComparer_Equal_vars(t *testing.T) {
 	v := &shared.Vars{}
 	v.Set("$varB", []int{1, 2, 3})
