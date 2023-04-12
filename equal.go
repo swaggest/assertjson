@@ -193,7 +193,7 @@ func (c Comparer) filterExpected(expected []byte) ([]byte, error) {
 				return nil, fmt.Errorf("failed to marshal var %s: %v", k, err) // Not wrapping to support go1.12.
 			}
 
-			expected = bytes.Replace(expected, []byte(`"`+k+`"`), j, -1) // nolint:gocritic // To support go1.11.
+			expected = bytes.Replace(expected, []byte(`"`+k+`"`), j, -1) //nolint:gocritic // To support go1.11.
 		}
 	}
 
