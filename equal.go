@@ -122,7 +122,7 @@ func (c Comparer) varCollected(s string, v interface{}) bool {
 	return false
 }
 
-func (c Comparer) filterDeltas(deltas []gojsondiff.Delta) []gojsondiff.Delta {
+func (c Comparer) filterDeltas(deltas []gojsondiff.Delta, ignoreAdded bool) []gojsondiff.Delta {
 	result := make([]gojsondiff.Delta, 0, len(deltas))
 
 	for _, delta := range deltas {
@@ -142,19 +142,24 @@ func (c Comparer) filterDeltas(deltas []gojsondiff.Delta) []gojsondiff.Delta {
 				}
 			}
 		case *gojsondiff.Object:
-			v.Deltas = c.filterDeltas(v.Deltas)
+			v.Deltas = c.filterDeltas(v.Deltas, ignoreAdded)
 			if len(v.Deltas) == 0 {
 				continue
 			}
 
 			delta = v
 		case *gojsondiff.Array:
-			v.Deltas = c.filterDeltas(v.Deltas)
+			v.Deltas = c.filterDeltas(v.Deltas, ignoreAdded)
 			if len(v.Deltas) == 0 {
 				continue
 			}
 
 			delta = v
+
+		case *gojsondiff.Added:
+			if ignoreAdded {
+				continue
+			}
 		}
 
 		result = append(result, delta)
@@ -237,6 +242,10 @@ func (c Comparer) FailNotEqualMarshal(expected []byte, actualValue interface{}) 
 
 // FailNotEqual returns error if JSON payloads are different, nil otherwise.
 func (c Comparer) FailNotEqual(expected, actual []byte) error {
+	return c.fail(expected, actual, false)
+}
+
+func (c Comparer) fail(expected, actual []byte, ignoreAdded bool) error {
 	var expDecoded, actDecoded interface{}
 
 	expected, err := c.filterExpected(expected)
@@ -277,7 +286,7 @@ func (c Comparer) FailNotEqual(expected, actual []byte) error {
 		return nil
 	}
 
-	diffValue = &diff{deltas: c.filterDeltas(diffValue.Deltas())}
+	diffValue = &diff{deltas: c.filterDeltas(diffValue.Deltas(), ignoreAdded)}
 	if !diffValue.Modified() {
 		return nil
 	}
