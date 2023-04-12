@@ -1,3 +1,4 @@
+// Package main provides a tool to compact JSON.
 package main
 
 import (
@@ -14,9 +15,8 @@ import (
 	"github.com/swaggest/assertjson"
 )
 
-// nolint // The function is a bit lengthy, but I'm not sure it
-// would be more approachable if split in several functions.
-func main() {
+// The function is a bit lengthy, but I'm not sure if it would be more approachable divided in several functions.
+func main() { //nolint
 	var (
 		input, output  string
 		length         int
@@ -51,6 +51,7 @@ func main() {
 		var v interface{}
 
 		dec := json.NewDecoder(os.Stdin)
+
 		err := dec.Decode(&v)
 		if err != nil {
 			log.Fatalf("could not process input: %v", err)
@@ -60,6 +61,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("could not process input: %v", err)
 		}
+
 		fmt.Println(string(comp))
 
 		return
@@ -76,7 +78,7 @@ func main() {
 				log.Printf("compacting %s.\n", m)
 			}
 
-			// nolint:gosec // Intentional file reading.
+			//nolint:gosec // Intentional file reading.
 			orig, err := ioutil.ReadFile(m)
 			if err != nil {
 				log.Fatalf("could not read input %s: %v", m, err)
@@ -104,7 +106,7 @@ func main() {
 				log.Printf("writing to %s\n", out)
 			}
 
-			err = ioutil.WriteFile(out, comp, 0600)
+			err = ioutil.WriteFile(out, comp, 0o600)
 			if err != nil {
 				log.Fatalf("could not write output to %s: %v", out, err)
 			}
