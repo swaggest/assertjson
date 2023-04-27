@@ -56,6 +56,18 @@ func TestDowngrade(t *testing.T) {
 	assert.Equal(t, `{"xyz":123,"abc":987}`, string(j))
 }
 
+func TestDowngrade2(t *testing.T) {
+	dd, err := json5.Downgrade([]byte(`{
+  "values": {
+    "app_token::$appToken::web_tracking_enabled": "1",
+    "app_token::$appToken::web_redirect_base_url": "http://redirect.com",
+  }
+}`))
+
+	require.NoError(t, err)
+	assert.Equal(t, `{"values":{"app_token::$appToken::web_redirect_base_url":"http://redirect.com","app_token::$appToken::web_tracking_enabled":"1"}}`, string(dd))
+}
+
 func TestDowngrade_array(t *testing.T) {
 	j5 := `		[{
 		// XYZ.
