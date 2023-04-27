@@ -32,7 +32,17 @@ func Downgrade(data []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	return json.Marshal(v)
+	if d, err := json.Marshal(v); err == nil {
+		return d, nil
+	}
+
+	// Fallback decoding for cases like a dangling comma.
+	var i interface{}
+	if err := Unmarshal(data, &i); err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(i)
 }
 
 // Unmarshal parses the JSON5-encoded data and stores the result
