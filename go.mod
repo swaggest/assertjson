@@ -3,9 +3,9 @@ module github.com/swaggest/assertjson
 go 1.17
 
 require (
-	github.com/bool64/dev v0.2.27
+	github.com/bool64/dev v0.2.29
 	github.com/bool64/shared v0.1.5
-	github.com/iancoleman/orderedmap v0.2.0
+	github.com/iancoleman/orderedmap v0.3.0
 	github.com/stretchr/testify v1.4.0
 	github.com/yosuke-furukawa/json5 v0.1.2-0.20201207051438-cf7bb3f354ff
 	github.com/yudai/gojsondiff v1.0.0
