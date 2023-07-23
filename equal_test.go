@@ -159,6 +159,7 @@ func TestEqualMarshal(t *testing.T) {
 	}
 
 	assertjson.EqualMarshal(t, []byte(`{"a":123,"b":"abc"}`), v)
+	assertjson.EqMarshal(t, `{"a":123,"b":"abc"}`, v)
 }
 
 func TestFailNotEqualMarshal(t *testing.T) {

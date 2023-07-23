@@ -355,3 +355,12 @@ func (c Comparer) reduceDiff(diffText string) string {
 
 	return strings.Join(result, "\n")
 }
+
+// EqMarshal marshals actual value and compares two JSON documents ignoring string values "<ignore-diff>".
+func EqMarshal(t TestingT, expected string, actualValue interface{}, msgAndArgs ...interface{}) bool {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+
+	return defaultComparer.EqualMarshal(t, []byte(expected), actualValue, msgAndArgs...)
+}
