@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -79,7 +78,7 @@ func main() { //nolint
 			}
 
 			//nolint:gosec // Intentional file reading.
-			orig, err := ioutil.ReadFile(m)
+			orig, err := os.ReadFile(m)
 			if err != nil {
 				log.Fatalf("could not read input %s: %v", m, err)
 			}
@@ -106,7 +105,7 @@ func main() { //nolint
 				log.Printf("writing to %s\n", out)
 			}
 
-			err = ioutil.WriteFile(out, comp, 0o600)
+			err = os.WriteFile(out, comp, 0o600)
 			if err != nil {
 				log.Fatalf("could not write output to %s: %v", out, err)
 			}
