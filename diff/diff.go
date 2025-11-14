@@ -260,17 +260,14 @@ func (differ *Differ) compareValues(
 		return false, NewModified(position, left, right)
 	}
 
-	switch left.(type) {
+	switch l := left.(type) {
 	case map[string]interface{}:
-		l := left.(map[string]interface{})
-
 		childDeltas := differ.compareMaps(l, right.(map[string]interface{}))
 		if len(childDeltas) > 0 {
 			return false, NewObject(position, childDeltas)
 		}
 
 	case []interface{}:
-		l := left.([]interface{})
 		childDeltas := differ.compareArrays(l, right.([]interface{}))
 
 		if len(childDeltas) > 0 {
@@ -291,9 +288,9 @@ func (differ *Differ) compareValues(
 				reflect.ValueOf(right).Kind() == reflect.String &&
 				differ.textDiffMinimumLength <= len(reflect.ValueOf(left).String()) {
 				textDiff := dmp.New()
-				patchs := textDiff.PatchMake(reflect.ValueOf(left).String(), reflect.ValueOf(right).String())
+				patches := textDiff.PatchMake(reflect.ValueOf(left).String(), reflect.ValueOf(right).String())
 
-				return false, NewTextDiff(position, patchs, left, right)
+				return false, NewTextDiff(position, patches, left, right)
 			}
 
 			return false, NewModified(position, left, right)

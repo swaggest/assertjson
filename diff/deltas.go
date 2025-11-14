@@ -162,13 +162,11 @@ func NewObject(position Position, deltas []Delta) *Object {
 
 // PostApply processes the given object by applying deltas at positions determined by the object's type (map or slice).
 func (d *Object) PostApply(object interface{}) interface{} {
-	switch object.(type) {
+	switch o := object.(type) {
 	case map[string]interface{}:
-		o := object.(map[string]interface{})
 		n := string(d.PostPosition().(Name))
 		o[n] = applyDeltas(d.Deltas, o[n])
 	case []interface{}:
-		o := object.([]interface{})
 		n := int(d.PostPosition().(Index))
 		o[n] = applyDeltas(d.Deltas, o[n])
 	}
@@ -201,13 +199,11 @@ func NewArray(position Position, deltas []Delta) *Array {
 
 // PostApply applies the stored deltas to the provided object based on their positions, modifying and returning the object.
 func (d *Array) PostApply(object interface{}) interface{} {
-	switch object.(type) {
+	switch o := object.(type) {
 	case map[string]interface{}:
-		o := object.(map[string]interface{})
 		n := string(d.PostPosition().(Name))
 		o[n] = applyDeltas(d.Deltas, o[n])
 	case []interface{}:
-		o := object.([]interface{})
 		n := int(d.PostPosition().(Index))
 		o[n] = applyDeltas(d.Deltas, o[n])
 	}
@@ -239,21 +235,21 @@ func NewAdded(position Position, value interface{}) *Added {
 
 // PostApply applies the added value to the given object at the position specified by the PostPosition method.
 func (d *Added) PostApply(object interface{}) interface{} {
-	switch object.(type) {
+	switch o := object.(type) {
 	case map[string]interface{}:
 		object.(map[string]interface{})[string(d.PostPosition().(Name))] = d.Value
 	case []interface{}:
 		i := int(d.PostPosition().(Index))
-		o := object.([]interface{})
 
 		if i < len(o) {
 			o = append(o, 0) // dummy
 			copy(o[i+1:], o[i:])
 			o[i] = d.Value
-			object = o
-		} else {
-			object = append(o, d.Value)
+
+			return o
 		}
+
+		return append(o, d.Value)
 	}
 
 	return object
@@ -289,11 +285,11 @@ func NewModified(position Position, oldValue, newValue interface{}) *Modified {
 
 // PostApply updates a map or slice at a specific position with a new value and returns the modified object.
 func (d *Modified) PostApply(object interface{}) interface{} {
-	switch object.(type) {
+	switch o := object.(type) {
 	case map[string]interface{}:
-		object.(map[string]interface{})[string(d.PostPosition().(Name))] = d.NewValue
+		o[string(d.PostPosition().(Name))] = d.NewValue
 	case []interface{}:
-		object.([]interface{})[int(d.PostPosition().(Index))] = d.NewValue
+		o[(d.PostPosition().(Index))] = d.NewValue
 	}
 
 	return object
@@ -304,11 +300,11 @@ func (d *Modified) similarity() (similarity float64) {
 	if reflect.TypeOf(d.OldValue) == reflect.TypeOf(d.NewValue) {
 		similarity += 0.3 // types are same
 
-		switch d.OldValue.(type) {
+		switch t := d.OldValue.(type) {
 		case string:
-			similarity += 0.4 * stringSimilarity(d.OldValue.(string), d.NewValue.(string))
+			similarity += 0.4 * stringSimilarity(t, d.NewValue.(string))
 		case float64:
-			ratio := d.OldValue.(float64) / d.NewValue.(float64)
+			ratio := t / d.NewValue.(float64)
 			if ratio > 1 {
 				ratio = 1 / ratio
 			}
@@ -340,15 +336,13 @@ func NewTextDiff(position Position, diff []dmp.Patch, oldValue, newValue interfa
 
 // PostApply updates the provided object with the changes specified in the TextDiff and returns the modified object.
 func (d *TextDiff) PostApply(object interface{}) interface{} {
-	switch object.(type) {
+	switch o := object.(type) {
 	case map[string]interface{}:
-		o := object.(map[string]interface{})
 		i := string(d.PostPosition().(Name))
 		d.OldValue = o[i]
 		d.patch()
 		o[i] = d.NewValue
 	case []interface{}:
-		o := object.([]interface{})
 		i := d.PostPosition().(Index)
 		d.OldValue = o[i]
 		d.patch()
@@ -403,13 +397,13 @@ func NewDeleted(position Position, value interface{}) *Deleted {
 
 // PreApply removes an element from a map or slice based on the position specified in the Deleted instance.
 func (d Deleted) PreApply(object interface{}) interface{} {
-	switch object.(type) {
+	switch o := object.(type) {
 	case map[string]interface{}:
 		delete(object.(map[string]interface{}), string(d.PrePosition().(Name)))
 	case []interface{}:
 		i := int(d.PrePosition().(Index))
-		o := object.([]interface{})
-		object = append(o[:i], o[i+1:]...)
+
+		return append(o[:i], o[i+1:]...)
 	}
 
 	return object
@@ -450,14 +444,14 @@ func NewMoved(oldPosition Position, newPosition Position, value interface{}, del
 
 // PreApply modifies the given object by removing the element at the pre-move index and storing its value in the Moved instance.
 func (d *Moved) PreApply(object interface{}) interface{} {
-	switch object.(type) {
+	switch o := object.(type) {
 	case map[string]interface{}:
 		// not supported
 	case []interface{}:
 		i := int(d.PrePosition().(Index))
-		o := object.([]interface{})
 		d.Value = o[i]
-		object = append(o[:i], o[i+1:]...)
+
+		return append(o[:i], o[i+1:]...)
 	}
 
 	return object
@@ -465,12 +459,12 @@ func (d *Moved) PreApply(object interface{}) interface{} {
 
 // PostApply applies the stored delta after a move operation and adjusts the position of a value in the object.
 func (d *Moved) PostApply(object interface{}) interface{} {
-	switch object.(type) {
+	switch o := object.(type) {
 	case map[string]interface{}:
 		// not supported
 	case []interface{}:
 		i := int(d.PostPosition().(Index))
-		o := object.([]interface{})
+
 		o = append(o, 0) // dummy
 		copy(o[i+1:], o[i:])
 		o[i] = d.Value

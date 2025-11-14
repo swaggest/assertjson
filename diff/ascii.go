@@ -115,8 +115,7 @@ func (f *ASCIIFormatter) processObject(object map[string]interface{}, deltas []D
 
 	// Added
 	for _, delta := range deltas {
-		switch dt := delta.(type) {
-		case *Added:
+		if dt, ok := delta.(*Added); ok {
 			d := dt
 			f.printRecursive(d.String(), d.Value, ASCIIAdded)
 		}
@@ -131,10 +130,8 @@ func (f *ASCIIFormatter) processItem(value interface{}, deltas []Delta, position
 
 	if len(matchedDeltas) > 0 {
 		for _, matchedDelta := range matchedDeltas {
-			switch matchedDelta.(type) {
+			switch d := matchedDelta.(type) {
 			case *Object:
-				d := matchedDelta.(*Object)
-
 				switch value.(type) {
 				case map[string]interface{}:
 					// ok
@@ -157,8 +154,6 @@ func (f *ASCIIFormatter) processItem(value interface{}, deltas []Delta, position
 				f.closeLine()
 
 			case *Array:
-				d := matchedDelta.(*Array)
-
 				switch value.(type) {
 				case []interface{}:
 					// ok
@@ -181,13 +176,11 @@ func (f *ASCIIFormatter) processItem(value interface{}, deltas []Delta, position
 				f.closeLine()
 
 			case *Added:
-				d := matchedDelta.(*Added)
 				f.printRecursive(positionStr, d.Value, ASCIIAdded)
 
 				f.size[len(f.size)-1]++
 
 			case *Modified:
-				d := matchedDelta.(*Modified)
 				savedSize := f.size[len(f.size)-1]
 				f.printRecursive(positionStr, d.OldValue, ASCIIDeleted)
 				f.size[len(f.size)-1] = savedSize
@@ -195,17 +188,15 @@ func (f *ASCIIFormatter) processItem(value interface{}, deltas []Delta, position
 
 			case *TextDiff:
 				savedSize := f.size[len(f.size)-1]
-				d := matchedDelta.(*TextDiff)
 				f.printRecursive(positionStr, d.OldValue, ASCIIDeleted)
 				f.size[len(f.size)-1] = savedSize
 				f.printRecursive(positionStr, d.NewValue, ASCIIAdded)
 
 			case *Deleted:
-				d := matchedDelta.(*Deleted)
 				f.printRecursive(positionStr, d.Value, ASCIIDeleted)
 
 			default:
-				return errors.New("Unknown Delta type detected")
+				return errors.New("unknown Delta type detected")
 			}
 		}
 	} else {
