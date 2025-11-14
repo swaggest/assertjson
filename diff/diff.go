@@ -367,7 +367,7 @@ func (differ *Differ) maximizeSimilarities(left []maybe, right []maybe) (resultD
 			prevY := dpTable[x][y+1]
 			score := deltaTable[x][y].Similarity() + dpTable[x+1][y+1]
 
-			dpTable[x][y] = max(prevX, prevY, score)
+			dpTable[x][y] = maxFloat(prevX, prevY, score)
 		}
 	}
 
@@ -460,7 +460,7 @@ func sortedKeys(m map[string]interface{}) (keys []string) {
 	return keys
 }
 
-func max(first float64, rest ...float64) (max float64) {
+func maxFloat(first float64, rest ...float64) (max float64) {
 	max = first
 	for _, value := range rest {
 		if max < value {

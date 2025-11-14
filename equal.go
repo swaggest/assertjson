@@ -18,7 +18,7 @@ type Comparer struct {
 	Vars *shared.Vars
 
 	// FormatterConfig controls diff formatter configuration.
-	FormatterConfig d2.AsciiFormatterConfig
+	FormatterConfig d2.ASCIIFormatterConfig
 
 	// KeepFullDiff shows full diff in error message.
 	KeepFullDiff bool

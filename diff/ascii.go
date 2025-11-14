@@ -7,37 +7,42 @@ import (
 	"fmt"
 )
 
-func NewAsciiFormatter(left interface{}, config AsciiFormatterConfig) *AsciiFormatter {
-	return &AsciiFormatter{
+// NewASCIIFormatter creates a new ASCIIFormatter instance with the specified left data and configuration settings.
+func NewASCIIFormatter(left interface{}, config ASCIIFormatterConfig) *ASCIIFormatter {
+	return &ASCIIFormatter{
 		left:   left,
 		config: config,
 	}
 }
 
-type AsciiFormatter struct {
+// ASCIIFormatter is used to generate ASCII representations of differences between JSON-like data structures.
+type ASCIIFormatter struct {
 	left    interface{}
-	config  AsciiFormatterConfig
+	config  ASCIIFormatterConfig
 	buffer  *bytes.Buffer
 	path    []string
 	size    []int
 	inArray []bool
-	line    *AsciiLine
+	line    *ASCIILine
 }
 
-type AsciiFormatterConfig struct {
+// ASCIIFormatterConfig specifies configuration options for formatting ASCII representations of data structures.
+// ShowArrayIndex determines if array indices should be displayed in the formatted output.
+// Coloring enables or disables colored output in the formatted result.
+type ASCIIFormatterConfig struct {
 	ShowArrayIndex bool
 	Coloring       bool
 }
 
-var AsciiFormatterDefaultConfig = AsciiFormatterConfig{}
-
-type AsciiLine struct {
+// ASCIILine represents a line in an ASCII-formatted output with a marker, indentation, and a buffer containing content.
+type ASCIILine struct {
 	marker string
 	indent int
 	buffer *bytes.Buffer
 }
 
-func (f *AsciiFormatter) Format(diff Diff) (result string, err error) {
+// Format formats the differences between two JSON objects into an ASCII representation using the provided Diff.
+func (f *ASCIIFormatter) Format(diff Diff) (result string, err error) {
 	f.buffer = bytes.NewBuffer([]byte{})
 	f.path = []string{}
 	f.size = []int{}
@@ -55,7 +60,7 @@ func (f *AsciiFormatter) Format(diff Diff) (result string, err error) {
 	return f.buffer.String(), nil
 }
 
-func (f *AsciiFormatter) formatObject(left map[string]interface{}, df Diff) {
+func (f *ASCIIFormatter) formatObject(left map[string]interface{}, df Diff) {
 	f.addLineWith("{")
 	f.push("ROOT", len(left), false)
 	f.processObject(left, df.Deltas())
@@ -63,7 +68,7 @@ func (f *AsciiFormatter) formatObject(left map[string]interface{}, df Diff) {
 	f.addLineWith("}")
 }
 
-func (f *AsciiFormatter) formatArray(left []interface{}, df Diff) {
+func (f *ASCIIFormatter) formatArray(left []interface{}, df Diff) {
 	f.addLineWith("[")
 	f.push("ROOT", len(left), true)
 	f.processArray(left, df.Deltas())
@@ -71,7 +76,7 @@ func (f *AsciiFormatter) formatArray(left []interface{}, df Diff) {
 	f.addLineWith("]")
 }
 
-func (f *AsciiFormatter) processArray(array []interface{}, deltas []Delta) error {
+func (f *ASCIIFormatter) processArray(array []interface{}, deltas []Delta) error {
 	patchedIndex := 0
 
 	for index, value := range array {
@@ -92,14 +97,14 @@ func (f *AsciiFormatter) processArray(array []interface{}, deltas []Delta) error
 				continue
 			}
 
-			f.printRecursive(d.String(), d.Value, AsciiAdded)
+			f.printRecursive(d.String(), d.Value, ASCIIAdded)
 		}
 	}
 
 	return nil
 }
 
-func (f *AsciiFormatter) processObject(object map[string]interface{}, deltas []Delta) error {
+func (f *ASCIIFormatter) processObject(object map[string]interface{}, deltas []Delta) error {
 	names := sortedKeys(object)
 	for _, name := range names {
 		value := object[name]
@@ -113,14 +118,14 @@ func (f *AsciiFormatter) processObject(object map[string]interface{}, deltas []D
 		switch dt := delta.(type) {
 		case *Added:
 			d := dt
-			f.printRecursive(d.String(), d.Value, AsciiAdded)
+			f.printRecursive(d.String(), d.Value, ASCIIAdded)
 		}
 	}
 
 	return nil
 }
 
-func (f *AsciiFormatter) processItem(value interface{}, deltas []Delta, position Position) error {
+func (f *ASCIIFormatter) processItem(value interface{}, deltas []Delta, position Position) error {
 	matchedDeltas := f.searchDeltas(deltas, position)
 	positionStr := position.String()
 
@@ -139,14 +144,14 @@ func (f *AsciiFormatter) processItem(value interface{}, deltas []Delta, position
 
 				o := value.(map[string]interface{})
 
-				f.newLine(AsciiSame)
+				f.newLine(ASCIISame)
 				f.printKey(positionStr)
 				f.print("{")
 				f.closeLine()
 				f.push(positionStr, len(o), false)
 				f.processObject(o, d.Deltas)
 				f.pop()
-				f.newLine(AsciiSame)
+				f.newLine(ASCIISame)
 				f.print("}")
 				f.printComma()
 				f.closeLine()
@@ -163,54 +168,54 @@ func (f *AsciiFormatter) processItem(value interface{}, deltas []Delta, position
 
 				a := value.([]interface{})
 
-				f.newLine(AsciiSame)
+				f.newLine(ASCIISame)
 				f.printKey(positionStr)
 				f.print("[")
 				f.closeLine()
 				f.push(positionStr, len(a), true)
 				f.processArray(a, d.Deltas)
 				f.pop()
-				f.newLine(AsciiSame)
+				f.newLine(ASCIISame)
 				f.print("]")
 				f.printComma()
 				f.closeLine()
 
 			case *Added:
 				d := matchedDelta.(*Added)
-				f.printRecursive(positionStr, d.Value, AsciiAdded)
+				f.printRecursive(positionStr, d.Value, ASCIIAdded)
 
 				f.size[len(f.size)-1]++
 
 			case *Modified:
 				d := matchedDelta.(*Modified)
 				savedSize := f.size[len(f.size)-1]
-				f.printRecursive(positionStr, d.OldValue, AsciiDeleted)
+				f.printRecursive(positionStr, d.OldValue, ASCIIDeleted)
 				f.size[len(f.size)-1] = savedSize
-				f.printRecursive(positionStr, d.NewValue, AsciiAdded)
+				f.printRecursive(positionStr, d.NewValue, ASCIIAdded)
 
 			case *TextDiff:
 				savedSize := f.size[len(f.size)-1]
 				d := matchedDelta.(*TextDiff)
-				f.printRecursive(positionStr, d.OldValue, AsciiDeleted)
+				f.printRecursive(positionStr, d.OldValue, ASCIIDeleted)
 				f.size[len(f.size)-1] = savedSize
-				f.printRecursive(positionStr, d.NewValue, AsciiAdded)
+				f.printRecursive(positionStr, d.NewValue, ASCIIAdded)
 
 			case *Deleted:
 				d := matchedDelta.(*Deleted)
-				f.printRecursive(positionStr, d.Value, AsciiDeleted)
+				f.printRecursive(positionStr, d.Value, ASCIIDeleted)
 
 			default:
 				return errors.New("Unknown Delta type detected")
 			}
 		}
 	} else {
-		f.printRecursive(positionStr, value, AsciiSame)
+		f.printRecursive(positionStr, value, ASCIISame)
 	}
 
 	return nil
 }
 
-func (f *AsciiFormatter) searchDeltas(deltas []Delta, position Position) (results []Delta) {
+func (f *ASCIIFormatter) searchDeltas(deltas []Delta, position Position) (results []Delta) {
 	results = make([]Delta, 0)
 
 	for _, delta := range deltas {
@@ -232,47 +237,52 @@ func (f *AsciiFormatter) searchDeltas(deltas []Delta, position Position) (result
 }
 
 const (
-	AsciiSame    = " "
-	AsciiAdded   = "+"
-	AsciiDeleted = "-"
+	// ASCIISame represents the ASCII string " " used to indicate unchanged or identical elements in a comparison.
+	ASCIISame = " "
+
+	// ASCIIAdded represents the ASCII string "+" used to indicate newly added items or elements in comparisons.
+	ASCIIAdded = "+"
+
+	// ASCIIDeleted represents the ASCII string "-" used to indicate deleted items or removed elements.
+	ASCIIDeleted = "-"
 )
 
 // ACSIIStyles is a map defining ANSI color styles for different ASCII markers used in formatting output.
 var ACSIIStyles = map[string]string{
-	AsciiAdded:   "30;42",
-	AsciiDeleted: "30;41",
+	ASCIIAdded:   "30;42",
+	ASCIIDeleted: "30;41",
 }
 
-func (f *AsciiFormatter) push(name string, size int, array bool) {
+func (f *ASCIIFormatter) push(name string, size int, array bool) {
 	f.path = append(f.path, name)
 	f.size = append(f.size, size)
 	f.inArray = append(f.inArray, array)
 }
 
-func (f *AsciiFormatter) pop() {
+func (f *ASCIIFormatter) pop() {
 	f.path = f.path[0 : len(f.path)-1]
 	f.size = f.size[0 : len(f.size)-1]
 	f.inArray = f.inArray[0 : len(f.inArray)-1]
 }
 
-func (f *AsciiFormatter) addLineWith(value string) {
-	f.line = &AsciiLine{
-		marker: AsciiSame,
+func (f *ASCIIFormatter) addLineWith(value string) {
+	f.line = &ASCIILine{
+		marker: ASCIISame,
 		indent: len(f.path),
 		buffer: bytes.NewBufferString(value),
 	}
 	f.closeLine()
 }
 
-func (f *AsciiFormatter) newLine(marker string) {
-	f.line = &AsciiLine{
+func (f *ASCIIFormatter) newLine(marker string) {
+	f.line = &ASCIILine{
 		marker: marker,
 		indent: len(f.path),
 		buffer: bytes.NewBuffer([]byte{}),
 	}
 }
 
-func (f *AsciiFormatter) closeLine() {
+func (f *ASCIIFormatter) closeLine() {
 	style, ok := ACSIIStyles[f.line.marker]
 	if f.config.Coloring && ok {
 		f.buffer.WriteString("\x1b[" + style + "m")
@@ -293,7 +303,7 @@ func (f *AsciiFormatter) closeLine() {
 	f.buffer.WriteRune('\n')
 }
 
-func (f *AsciiFormatter) printKey(name string) {
+func (f *ASCIIFormatter) printKey(name string) {
 	if !f.inArray[len(f.inArray)-1] {
 		fmt.Fprintf(f.line.buffer, `"%s": `, name)
 	} else if f.config.ShowArrayIndex {
@@ -301,14 +311,14 @@ func (f *AsciiFormatter) printKey(name string) {
 	}
 }
 
-func (f *AsciiFormatter) printComma() {
+func (f *ASCIIFormatter) printComma() {
 	f.size[len(f.size)-1]--
 	if f.size[len(f.size)-1] > 0 {
 		f.line.buffer.WriteRune(',')
 	}
 }
 
-func (f *AsciiFormatter) printValue(value interface{}) {
+func (f *ASCIIFormatter) printValue(value interface{}) {
 	switch v := value.(type) {
 	case uint64:
 		fmt.Fprint(f.line.buffer, v)
@@ -323,11 +333,11 @@ func (f *AsciiFormatter) printValue(value interface{}) {
 	}
 }
 
-func (f *AsciiFormatter) print(a string) {
+func (f *ASCIIFormatter) print(a string) {
 	f.line.buffer.WriteString(a)
 }
 
-func (f *AsciiFormatter) printRecursive(name string, value interface{}, marker string) {
+func (f *ASCIIFormatter) printRecursive(name string, value interface{}, marker string) {
 	switch value := value.(type) {
 	case map[string]interface{}:
 		f.newLine(marker)

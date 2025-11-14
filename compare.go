@@ -181,7 +181,7 @@ func (c Comparer) fail(expected, actual []byte, ignoreAdded bool) error {
 		return nil
 	}
 
-	diffText, err := d2.NewAsciiFormatter(expDecoded, c.FormatterConfig).Format(diffValue)
+	diffText, err := d2.NewASCIIFormatter(expDecoded, c.FormatterConfig).Format(diffValue)
 	if err != nil {
 		return fmt.Errorf("failed to format diff:\n%wv", err)
 	}
