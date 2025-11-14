@@ -307,9 +307,8 @@ func applyDeltas(deltas []Delta, object interface{}) interface{} {
 	preDeltas := make(preDeltas, 0)
 
 	for _, delta := range deltas {
-		switch delta := delta.(type) {
-		case PreDelta:
-			preDeltas = append(preDeltas, delta)
+		if dt, ok := delta.(PreDelta); ok {
+			preDeltas = append(preDeltas, dt)
 		}
 	}
 
@@ -322,9 +321,8 @@ func applyDeltas(deltas []Delta, object interface{}) interface{} {
 	postDeltas := make(postDeltas, 0, len(deltas)-len(preDeltas))
 
 	for _, delta := range deltas {
-		switch delta := delta.(type) {
-		case PostDelta:
-			postDeltas = append(postDeltas, delta)
+		if dt, ok := delta.(PostDelta); ok {
+			postDeltas = append(postDeltas, dt)
 		}
 	}
 
@@ -394,13 +392,14 @@ func (differ *Differ) maximizeSimilarities(left []maybe, right []maybe) (resultD
 		xValidLength := len(left) - maxInvalidLength + y
 		yValidLength := len(right) - maxInvalidLength + x
 
-		if x+1 < xValidLength && current == nextX {
+		switch {
+		case x+1 < xValidLength && current == nextX:
 			freeLeft = append(freeLeft, left[x])
 			x++
-		} else if y+1 < yValidLength && current == nextY {
+		case y+1 < yValidLength && current == nextY:
 			freeRight = append(freeRight, right[y])
 			y++
-		} else {
+		default:
 			resultDeltas = append(resultDeltas, deltaTable[x][y])
 			x++
 			y++
