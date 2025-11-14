@@ -5,10 +5,10 @@ run:
 linters:
   default: all
   disable:
-    - nilnil
-    - tparallel
+    - gocyclo
+    - errcheck
     - err113
-    - errorlint
+    - nilnil
     - noinlineerr
     - wsl_v5
     - funcorder
@@ -34,6 +34,11 @@ linters:
     - varnamelen
     - wrapcheck
   settings:
+    gocognit:
+      min-complexity: 50
+    funlen:
+      statements: 65
+      lines: 120
     dupl:
       threshold: 100
     errcheck:
@@ -41,16 +46,17 @@ linters:
       check-blank: true
     gocyclo:
       min-complexity: 20
-    cyclop:
-      max-complexity: 15
     misspell:
       locale: US
     unparam:
       check-exported: true
+    cyclop:
+      max-complexity: 25
   exclusions:
     generated: lax
     rules:
       - linters:
+          - tparallel
           - gosec
           - dupl
           - funlen

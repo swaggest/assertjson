@@ -16,7 +16,7 @@ import (
 )
 
 // The function is a bit lengthy, but I'm not sure if it would be more approachable divided in several functions.
-func main() { //nolint
+func main() {
 	var (
 		input, output  string
 		length         int
@@ -40,7 +40,7 @@ func main() { //nolint
 
 	input = flag.Arg(0)
 	if input == "" {
-		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Missing input path argument, use `-` for stdin.") //nolint
+		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Missing input path argument, use `-` for stdin.")
 		flag.Usage()
 
 		return
