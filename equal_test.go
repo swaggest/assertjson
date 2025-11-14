@@ -59,8 +59,8 @@ func TestEquals_message(t *testing.T) {
 		assert.Equal(t, "\n%s", format)
 		assert.Len(t, args, 1)
 
-		assert.Equal(t, `	Error Trace:	equal.go:88
-	            				equal.go:63
+		assert.Equal(t, `	Error Trace:	equal.go:82
+	            				equal.go:57
 	            				equal_test.go:58
 	Error:      	Not equal:
 	            	 {
@@ -237,7 +237,32 @@ func TestComparer_Equal_vars_scalar(t *testing.T) {
 	b, found := v.Get("$varB")
 
 	assert.True(t, found)
-	assert.Equal(t, []interface{}{123.0}, b)
+	assert.Equal(t, []interface{}{int64(123)}, b)
+
+	assert.NoError(t, c.FailNotEqual([]byte(`"$varC"`), []byte(`{"a":17294094973108486143}`)))
+	assert.EqualError(t, c.FailNotEqual([]byte(`"$varC"`), []byte(`{"a":17294094973108486144}`)),
+		"not equal:\n {\n-  \"a\": 17294094973108486143\n+  \"a\": 17294094973108486144\n }\n")
+	assert.NoError(t, c.FailNotEqual([]byte(`"$varC"`), []byte(`{"a":17294094973108486143}`)))
+
+	c1, found := v.Get("$varC")
+
+	assert.True(t, found)
+	assert.Equal(t, map[string]interface{}{"a": uint64(17294094973108486143)}, c1)
+}
+
+func TestComparer_Equal_vars_uint64(t *testing.T) {
+	v := &shared.Vars{}
+	c := assertjson.Comparer{Vars: v}
+
+	assert.NoError(t, c.FailNotEqual([]byte(`"$varC"`), []byte(`{"a":17294094973108486143}`)))
+	assert.EqualError(t, c.FailNotEqual([]byte(`"$varC"`), []byte(`{"a":17294094973108486144}`)),
+		"not equal:\n {\n-  \"a\": 17294094973108486143\n+  \"a\": 17294094973108486144\n }\n")
+	assert.NoError(t, c.FailNotEqual([]byte(`"$varC"`), []byte(`{"a":17294094973108486143}`)))
+
+	c1, found := v.Get("$varC")
+
+	assert.True(t, found)
+	assert.Equal(t, map[string]interface{}{"a": uint64(17294094973108486143)}, c1)
 }
 
 func TestComparer_Equal_long(t *testing.T) {

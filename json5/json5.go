@@ -60,7 +60,7 @@ func Unmarshal(data []byte, v interface{}) error {
 	// Second decode to make sure there is only one JSON5 value in data and no garbage in tail.
 	err = dec.Decode(&tail)
 
-	if err != io.EOF {
+	if !errors.Is(err, io.EOF) {
 		return errors.New("unexpected bytes after JSON5 payload")
 	}
 

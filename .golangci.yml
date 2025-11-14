@@ -5,10 +5,6 @@ run:
 linters:
   default: all
   disable:
-    - nilnil
-    - tparallel
-    - err113
-    - errorlint
     - noinlineerr
     - wsl_v5
     - funcorder
@@ -41,8 +37,6 @@ linters:
       check-blank: true
     gocyclo:
       min-complexity: 20
-    cyclop:
-      max-complexity: 15
     misspell:
       locale: US
     unparam:
