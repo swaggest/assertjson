@@ -16,7 +16,7 @@ import (
 )
 
 // The function is a bit lengthy, but I'm not sure if it would be more approachable divided in several functions.
-func main() { //nolint
+func main() {
 	var (
 		input, output  string
 		length         int

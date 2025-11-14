@@ -63,7 +63,11 @@ func (f *ASCIIFormatter) Format(diff Diff) (result string, err error) {
 func (f *ASCIIFormatter) formatObject(left map[string]interface{}, df Diff) {
 	f.addLineWith("{")
 	f.push("ROOT", len(left), false)
-	f.processObject(left, df.Deltas())
+
+	if err := f.processObject(left, df.Deltas()); err != nil {
+		panic(err)
+	}
+
 	f.pop()
 	f.addLineWith("}")
 }
@@ -71,7 +75,11 @@ func (f *ASCIIFormatter) formatObject(left map[string]interface{}, df Diff) {
 func (f *ASCIIFormatter) formatArray(left []interface{}, df Diff) {
 	f.addLineWith("[")
 	f.push("ROOT", len(left), true)
-	f.processArray(left, df.Deltas())
+
+	if err := f.processArray(left, df.Deltas()); err != nil {
+		panic(err)
+	}
+
 	f.pop()
 	f.addLineWith("]")
 }
@@ -89,9 +97,7 @@ func (f *ASCIIFormatter) processArray(array []interface{}, deltas []Delta) error
 
 	// additional Added
 	for _, delta := range deltas {
-		switch delta.(type) {
-		case *Added:
-			d := delta.(*Added)
+		if d, ok := delta.(*Added); ok {
 			// skip items already processed
 			if int(d.Position.(Index)) < len(array) {
 				continue
@@ -136,7 +142,7 @@ func (f *ASCIIFormatter) processItem(value interface{}, deltas []Delta, position
 				case map[string]interface{}:
 					// ok
 				default:
-					return errors.New("Type mismatch")
+					return errors.New("type mismatch")
 				}
 
 				o := value.(map[string]interface{})
@@ -146,7 +152,11 @@ func (f *ASCIIFormatter) processItem(value interface{}, deltas []Delta, position
 				f.print("{")
 				f.closeLine()
 				f.push(positionStr, len(o), false)
-				f.processObject(o, d.Deltas)
+
+				if err := f.processObject(o, d.Deltas); err != nil {
+					return err
+				}
+
 				f.pop()
 				f.newLine(ASCIISame)
 				f.print("}")
@@ -158,7 +168,7 @@ func (f *ASCIIFormatter) processItem(value interface{}, deltas []Delta, position
 				case []interface{}:
 					// ok
 				default:
-					return errors.New("Type mismatch")
+					return errors.New("type mismatch")
 				}
 
 				a := value.([]interface{})
@@ -168,7 +178,11 @@ func (f *ASCIIFormatter) processItem(value interface{}, deltas []Delta, position
 				f.print("[")
 				f.closeLine()
 				f.push(positionStr, len(a), true)
-				f.processArray(a, d.Deltas)
+
+				if err := f.processArray(a, d.Deltas); err != nil {
+					return err
+				}
+
 				f.pop()
 				f.newLine(ASCIISame)
 				f.print("]")
