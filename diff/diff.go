@@ -418,12 +418,14 @@ func (differ *Differ) maximizeSimilarities(left []maybe, right []maybe) (resultD
 	return resultDeltas, freeLeft, freeRight
 }
 
-func deltasSimilarity(deltas []Delta) (similarity float64) {
+func deltasSimilarity(deltas []Delta) float64 {
+	similarity := float64(0)
+
 	for _, delta := range deltas {
 		similarity += delta.Similarity()
 	}
 
-	similarity = similarity / float64(len(deltas))
+	similarity /= float64(len(deltas))
 
 	return similarity
 }
@@ -460,13 +462,13 @@ func sortedKeys(m map[string]interface{}) (keys []string) {
 	return keys
 }
 
-func maxFloat(first float64, rest ...float64) (max float64) {
-	max = first
+func maxFloat(first float64, rest ...float64) float64 {
+	m := first
 	for _, value := range rest {
-		if max < value {
-			max = value
+		if m < value {
+			m = value
 		}
 	}
 
-	return max
+	return m
 }

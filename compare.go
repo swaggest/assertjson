@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/bool64/shared"
-	d2 "github.com/swaggest/assertjson/diff"
+	"github.com/swaggest/assertjson/diff"
 )
 
 func (c Comparer) varCollected(s string, v interface{}) bool {
@@ -30,12 +30,12 @@ func (c Comparer) varCollected(s string, v interface{}) bool {
 	return false
 }
 
-func (c Comparer) filterDeltas(deltas []d2.Delta, ignoreAdded bool) []d2.Delta {
-	result := make([]d2.Delta, 0, len(deltas))
+func (c Comparer) filterDeltas(deltas []diff.Delta, ignoreAdded bool) []diff.Delta {
+	result := make([]diff.Delta, 0, len(deltas))
 
 	for _, delta := range deltas {
 		switch v := delta.(type) {
-		case *d2.Modified:
+		case *diff.Modified:
 			if c.IgnoreDiff == "" && c.Vars == nil {
 				break
 			}
@@ -49,14 +49,14 @@ func (c Comparer) filterDeltas(deltas []d2.Delta, ignoreAdded bool) []d2.Delta {
 					continue
 				}
 			}
-		case *d2.Object:
+		case *diff.Object:
 			v.Deltas = c.filterDeltas(v.Deltas, ignoreAdded)
 			if len(v.Deltas) == 0 {
 				continue
 			}
 
 			delta = v
-		case *d2.Array:
+		case *diff.Array:
 			v.Deltas = c.filterDeltas(v.Deltas, ignoreAdded)
 			if len(v.Deltas) == 0 {
 				continue
@@ -64,7 +64,7 @@ func (c Comparer) filterDeltas(deltas []d2.Delta, ignoreAdded bool) []d2.Delta {
 
 			delta = v
 
-		case *d2.Added:
+		case *diff.Added:
 			if ignoreAdded {
 				continue
 			}
@@ -77,10 +77,10 @@ func (c Comparer) filterDeltas(deltas []d2.Delta, ignoreAdded bool) []d2.Delta {
 }
 
 type df struct {
-	deltas []d2.Delta
+	deltas []diff.Delta
 }
 
-func (df *df) Deltas() []d2.Delta {
+func (df *df) Deltas() []diff.Delta {
 	return df.deltas
 }
 
@@ -103,18 +103,18 @@ func (c Comparer) filterExpected(expected []byte) ([]byte, error) {
 	return expected, nil
 }
 
-func (c Comparer) compare(expDecoded, actDecoded interface{}) (d2.Diff, error) {
+func (c Comparer) compare(expDecoded, actDecoded interface{}) (diff.Diff, error) {
 	switch v := expDecoded.(type) {
 	case []interface{}:
 		if actArray, ok := actDecoded.([]interface{}); ok {
-			return d2.New().CompareArrays(v, actArray), nil
+			return diff.New().CompareArrays(v, actArray), nil
 		}
 
 		return nil, errors.New("types mismatch, array expected")
 
 	case map[string]interface{}:
 		if actObject, ok := actDecoded.(map[string]interface{}); ok {
-			return d2.New().CompareObjects(v, actObject), nil
+			return diff.New().CompareObjects(v, actObject), nil
 		}
 
 		return nil, errors.New("types mismatch, object expected")
@@ -181,7 +181,7 @@ func (c Comparer) fail(expected, actual []byte, ignoreAdded bool) error {
 		return nil
 	}
 
-	diffText, err := d2.NewASCIIFormatter(expDecoded, c.FormatterConfig).Format(diffValue)
+	diffText, err := diff.NewASCIIFormatter(expDecoded, c.FormatterConfig).Format(diffValue)
 	if err != nil {
 		return fmt.Errorf("failed to format diff:\n%wv", err)
 	}

@@ -1,7 +1,6 @@
 package diff
 
 import (
-	"errors"
 	"reflect"
 	"strconv"
 
@@ -292,7 +291,6 @@ func NewModified(position Position, oldValue, newValue interface{}) *Modified {
 func (d *Modified) PostApply(object interface{}) interface{} {
 	switch object.(type) {
 	case map[string]interface{}:
-		// TODO check old value
 		object.(map[string]interface{})[string(d.PostPosition().(Name))] = d.NewValue
 	case []interface{}:
 		object.([]interface{})[int(d.PostPosition().(Index))] = d.NewValue
@@ -346,16 +344,13 @@ func (d *TextDiff) PostApply(object interface{}) interface{} {
 	case map[string]interface{}:
 		o := object.(map[string]interface{})
 		i := string(d.PostPosition().(Name))
-		// TODO error
 		d.OldValue = o[i]
-		// TODO error
 		d.patch()
 		o[i] = d.NewValue
 	case []interface{}:
 		o := object.([]interface{})
 		i := d.PostPosition().(Index)
 		d.OldValue = o[i]
-		// TODO error
 		d.patch()
 		o[i] = d.NewValue
 	}
@@ -363,9 +358,9 @@ func (d *TextDiff) PostApply(object interface{}) interface{} {
 	return object
 }
 
-func (d *TextDiff) patch() error {
+func (d *TextDiff) patch() {
 	if d.OldValue == nil {
-		return errors.New("Old Value is not set")
+		panic("old Value is not set")
 	}
 
 	patcher := dmp.New()
@@ -373,13 +368,11 @@ func (d *TextDiff) patch() error {
 	patched, successes := patcher.PatchApply(d.Diff, d.OldValue.(string))
 	for _, success := range successes {
 		if !success {
-			return errors.New("Failed to apply a patch")
+			panic("failed to apply a patch")
 		}
 	}
 
 	d.NewValue = patched
-
-	return nil
 }
 
 // DiffString returns the textual representation of the diff stored in the TextDiff instance.
@@ -409,10 +402,9 @@ func NewDeleted(position Position, value interface{}) *Deleted {
 }
 
 // PreApply removes an element from a map or slice based on the position specified in the Deleted instance.
-func (d *Deleted) PreApply(object interface{}) interface{} {
+func (d Deleted) PreApply(object interface{}) interface{} {
 	switch object.(type) {
 	case map[string]interface{}:
-		// TODO check old value
 		delete(object.(map[string]interface{}), string(d.PrePosition().(Name)))
 	case []interface{}:
 		i := int(d.PrePosition().(Index))
