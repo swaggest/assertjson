@@ -40,7 +40,7 @@ func main() {
 
 	input = flag.Arg(0)
 	if input == "" {
-		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Missing input path argument, use `-` for stdin.") //nolint
+		_, _ = fmt.Fprintln(flag.CommandLine.Output(), "Missing input path argument, use `-` for stdin.")
 		flag.Usage()
 
 		return

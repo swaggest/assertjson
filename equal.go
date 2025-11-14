@@ -6,7 +6,7 @@ import (
 
 	"github.com/bool64/shared"
 	"github.com/stretchr/testify/assert"
-	d2 "github.com/swaggest/assertjson/diff"
+	"github.com/swaggest/assertjson/diff"
 )
 
 // Comparer compares JSON documents.
@@ -18,7 +18,7 @@ type Comparer struct {
 	Vars *shared.Vars
 
 	// FormatterConfig controls diff formatter configuration.
-	FormatterConfig d2.ASCIIFormatterConfig
+	FormatterConfig diff.ASCIIFormatterConfig
 
 	// KeepFullDiff shows full diff in error message.
 	KeepFullDiff bool
