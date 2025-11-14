@@ -120,22 +120,22 @@ type PostDelta interface {
 type postDelta struct{ Position }
 
 func (i postDelta) PostPosition() Position {
-	return Position(i.Position)
+	return i.Position
 }
 
 type postDeltas []PostDelta
 
-// for sorting.
+// Len returns the number of elements in the postDeltas slice. It is used for implementing the sort.Interface.
 func (s postDeltas) Len() int {
 	return len(s)
 }
 
-// for sorting.
+// Swap swaps the elements at indices i and j in the postDeltas slice. It is used to implement the sort.Interface.
 func (s postDeltas) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-// for sorting.
+// Less compares the PostPosition of elements at indices i and j and returns true if the i-th element is less than the j-th.
 func (s postDeltas) Less(i, j int) bool {
 	return s[i].PostPosition().CompareTo(s[j].PostPosition())
 }
