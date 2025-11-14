@@ -45,6 +45,7 @@ linters:
     generated: lax
     rules:
       - linters:
+          - tparallel
           - gosec
           - dupl
           - funlen

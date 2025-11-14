@@ -237,7 +237,8 @@ const (
 	AsciiDeleted = "-"
 )
 
-var AsciiStyles = map[string]string{
+// ACSIIStyles is a map defining ANSI color styles for different ASCII markers used in formatting output.
+var ACSIIStyles = map[string]string{
 	AsciiAdded:   "30;42",
 	AsciiDeleted: "30;41",
 }
@@ -272,7 +273,7 @@ func (f *AsciiFormatter) newLine(marker string) {
 }
 
 func (f *AsciiFormatter) closeLine() {
-	style, ok := AsciiStyles[f.line.marker]
+	style, ok := ACSIIStyles[f.line.marker]
 	if f.config.Coloring && ok {
 		f.buffer.WriteString("\x1b[" + style + "m")
 	}

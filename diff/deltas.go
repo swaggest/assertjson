@@ -55,21 +55,25 @@ type Position interface {
 // A Name is a Postition with a string, which means the delta is in an object.
 type Name string
 
+// String returns the string representation of the Name.
 func (n Name) String() (name string) {
 	return string(n)
 }
 
+// CompareTo returns true if the Name is lexicographically less than the given Position, which must be of type Name.
 func (n Name) CompareTo(another Position) bool {
 	return n < another.(Name)
 }
 
-// A Index is a Position with an int value, which means the Delta is in an Array.
+// Index is a Position with an int value, which means the Delta is in an Array.
 type Index int
 
+// String converts the Index value to its string representation and returns it.
 func (i Index) String() (name string) {
 	return strconv.Itoa(int(i))
 }
 
+// CompareTo compares the current Index with another Position and returns true if the current Index is smaller.
 func (i Index) CompareTo(another Position) bool {
 	return i < another.(Index)
 }
@@ -87,28 +91,28 @@ type PreDelta interface {
 type preDelta struct{ Position }
 
 func (i preDelta) PrePosition() Position {
-	return Position(i.Position)
+	return i.Position
 }
 
 type preDeltas []PreDelta
 
-// for sorting.
+// Len returns the number of elements in the preDeltas collection.
 func (s preDeltas) Len() int {
 	return len(s)
 }
 
-// for sorting.
+// Swap exchanges the elements at indices i and j in the preDeltas collection.
 func (s preDeltas) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-// for sorting.
+// Less reports whether the element with index i should sort before the element with index j in the preDeltas collection.
 func (s preDeltas) Less(i, j int) bool {
 	return !s[i].PrePosition().CompareTo(s[j].PrePosition())
 }
 
-// A PreDelta is a Delta that has a position of the right side JSON object.
-// Deltas implements this interface should be applies after PreDeltas.
+// PostDelta represents an interface for deltas applied post object modification.
+// It requires methods to retrieve the position and apply the delta to an object.
 type PostDelta interface {
 	// PostPosition returns the Position.
 	PostPosition() Position
@@ -157,6 +161,7 @@ func NewObject(position Position, deltas []Delta) *Object {
 	return &d
 }
 
+// PostApply processes the given object by applying deltas at positions determined by the object's type (map or slice).
 func (d *Object) PostApply(object interface{}) interface{} {
 	switch object.(type) {
 	case map[string]interface{}:
@@ -195,6 +200,7 @@ func NewArray(position Position, deltas []Delta) *Array {
 	return &d
 }
 
+// PostApply applies the stored deltas to the provided object based on their positions, modifying and returning the object.
 func (d *Array) PostApply(object interface{}) interface{} {
 	switch object.(type) {
 	case map[string]interface{}:
@@ -232,6 +238,7 @@ func NewAdded(position Position, value interface{}) *Added {
 	return &d
 }
 
+// PostApply applies the added value to the given object at the position specified by the PostPosition method.
 func (d *Added) PostApply(object interface{}) interface{} {
 	switch object.(type) {
 	case map[string]interface{}:
@@ -281,6 +288,7 @@ func NewModified(position Position, oldValue, newValue interface{}) *Modified {
 	return &d
 }
 
+// PostApply updates a map or slice at a specific position with a new value and returns the modified object.
 func (d *Modified) PostApply(object interface{}) interface{} {
 	switch object.(type) {
 	case map[string]interface{}:
@@ -322,7 +330,7 @@ type TextDiff struct {
 	Diff []dmp.Patch
 }
 
-// NewTextDiff returns.
+// NewTextDiff creates a new TextDiff instance with the provided position, diff, oldValue, and newValue.
 func NewTextDiff(position Position, diff []dmp.Patch, oldValue, newValue interface{}) *TextDiff {
 	d := TextDiff{
 		Modified: *NewModified(position, oldValue, newValue),
@@ -332,6 +340,7 @@ func NewTextDiff(position Position, diff []dmp.Patch, oldValue, newValue interfa
 	return &d
 }
 
+// PostApply updates the provided object with the changes specified in the TextDiff and returns the modified object.
 func (d *TextDiff) PostApply(object interface{}) interface{} {
 	switch object.(type) {
 	case map[string]interface{}:
@@ -373,13 +382,15 @@ func (d *TextDiff) patch() error {
 	return nil
 }
 
+// DiffString returns the textual representation of the diff stored in the TextDiff instance.
 func (d *TextDiff) DiffString() string {
-	dmp := dmp.New()
+	dm := dmp.New()
 
-	return dmp.PatchToText(d.Diff)
+	return dm.PatchToText(d.Diff)
 }
 
-// A Delted represents deleted field or index of an Object or an Array.
+// Deleted represents a change where an element is removed from a map or slice at a specific position.
+// It embeds preDelta to store positional metadata and includes the Value field to reference the deleted element.
 type Deleted struct {
 	preDelta
 
@@ -397,6 +408,7 @@ func NewDeleted(position Position, value interface{}) *Deleted {
 	return &d
 }
 
+// PreApply removes an element from a map or slice based on the position specified in the Deleted instance.
 func (d *Deleted) PreApply(object interface{}) interface{} {
 	switch object.(type) {
 	case map[string]interface{}:
@@ -411,6 +423,7 @@ func (d *Deleted) PreApply(object interface{}) interface{} {
 	return object
 }
 
+// Similarity calculates and returns the similarity for the Deleted delta type as a floating-point value.
 func (d Deleted) Similarity() (similarity float64) {
 	return 0
 }
@@ -430,6 +443,7 @@ type Moved struct {
 	Delta interface{}
 }
 
+// NewMoved creates and returns a new Moved instance representing a field that has been relocated with old and new positions.
 func NewMoved(oldPosition Position, newPosition Position, value interface{}, delta Delta) *Moved {
 	d := Moved{
 		preDelta:  preDelta{oldPosition},
@@ -442,6 +456,7 @@ func NewMoved(oldPosition Position, newPosition Position, value interface{}, del
 	return &d
 }
 
+// PreApply modifies the given object by removing the element at the pre-move index and storing its value in the Moved instance.
 func (d *Moved) PreApply(object interface{}) interface{} {
 	switch object.(type) {
 	case map[string]interface{}:
@@ -456,6 +471,7 @@ func (d *Moved) PreApply(object interface{}) interface{} {
 	return object
 }
 
+// PostApply applies the stored delta after a move operation and adjusts the position of a value in the object.
 func (d *Moved) PostApply(object interface{}) interface{} {
 	switch object.(type) {
 	case map[string]interface{}:

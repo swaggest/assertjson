@@ -294,9 +294,9 @@ func (differ *Differ) compareValues(
 				patchs := textDiff.PatchMake(reflect.ValueOf(left).String(), reflect.ValueOf(right).String())
 
 				return false, NewTextDiff(position, patchs, left, right)
-			} else {
-				return false, NewModified(position, left, right)
 			}
+
+			return false, NewModified(position, left, right)
 		}
 	}
 
